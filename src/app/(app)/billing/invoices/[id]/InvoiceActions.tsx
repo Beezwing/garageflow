@@ -34,7 +34,7 @@ function useRun() {
   return { run, pending };
 }
 
-function RemoveItem({ invoiceId, itemId }: { invoiceId: string; itemId: string }) {
+export function RemoveItem({ invoiceId, itemId }: { invoiceId: string; itemId: string }) {
   const { run, pending } = useRun();
   return (
     <button
@@ -47,7 +47,7 @@ function RemoveItem({ invoiceId, itemId }: { invoiceId: string; itemId: string }
   );
 }
 
-function AddItem({ invoiceId }: { invoiceId: string }) {
+export function AddItem({ invoiceId }: { invoiceId: string }) {
   const { run, pending } = useRun();
   const [f, setF] = React.useState({ kind: "other", description: "", quantity: "1", unit_price: "" });
   return (
@@ -105,7 +105,7 @@ function AddItem({ invoiceId }: { invoiceId: string }) {
   );
 }
 
-function RecordPayment({
+export function RecordPayment({
   invoiceId,
   balance,
   methods,
@@ -163,7 +163,7 @@ function RecordPayment({
   );
 }
 
-function StatusControls({
+export function StatusControls({
   invoiceId,
   status,
   workOrderId,
@@ -208,4 +208,3 @@ function StatusControls({
   );
 }
 
-export const InvoiceActions = { RemoveItem, AddItem, RecordPayment, StatusControls };

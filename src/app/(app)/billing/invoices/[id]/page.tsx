@@ -16,7 +16,7 @@ import {
   Th,
   Td,
 } from "@/components/ui/primitives";
-import { InvoiceActions } from "./InvoiceActions";
+import { RemoveItem, AddItem, RecordPayment, StatusControls } from "./InvoiceActions";
 
 const TONE: Record<string, "gray" | "amber" | "green" | "red" | "blue"> = {
   draft: "gray",
@@ -104,7 +104,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                       <Td className="text-right font-medium">{money(Number(it.amount), cur)}</Td>
                       {status === "draft" ? (
                         <Td className="text-right">
-                          <InvoiceActions.RemoveItem invoiceId={id} itemId={it.id as string} />
+                          <RemoveItem invoiceId={id} itemId={it.id as string} />
                         </Td>
                       ) : null}
                     </tr>
@@ -114,7 +114,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </TableWrap>
             {status === "draft" ? (
               <CardBody className="border-t border-border">
-                <InvoiceActions.AddItem invoiceId={id} />
+                <AddItem invoiceId={id} />
               </CardBody>
             ) : null}
           </Card>
@@ -154,7 +154,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             )}
             {canPay ? (
               <CardBody className="border-t border-border">
-                <InvoiceActions.RecordPayment
+                <RecordPayment
                   invoiceId={id}
                   balance={Number(invoice.balance)}
                   methods={["cash", "card", "bank_transfer", "online"]}
@@ -187,7 +187,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </CardBody>
           </Card>
 
-          <InvoiceActions.StatusControls invoiceId={id} status={status} workOrderId={w?.id ?? null} />
+          <StatusControls invoiceId={id} status={status} workOrderId={w?.id ?? null} />
         </div>
       </div>
     </div>
