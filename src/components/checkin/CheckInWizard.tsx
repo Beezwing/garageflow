@@ -165,7 +165,7 @@ export function CheckInWizard({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <ol className="mb-5 flex flex-wrap gap-1 text-xs">
+      <ol className="mb-5 flex flex-wrap gap-1 text-xs" data-tour="checkin-steps">
         {STEPS.map((s, i) => (
           <li
             key={s}
@@ -183,7 +183,7 @@ export function CheckInWizard({
         ))}
       </ol>
 
-      <Card>
+      <Card data-tour="checkin-body">
         <CardBody>
           {step === 0 && (
             <div className="space-y-4">
@@ -362,7 +362,7 @@ export function CheckInWizard({
                 />
               </Field>
 
-              <div>
+              <div data-tour="checkin-planned">
                 <p className="mb-1 text-sm font-medium text-text">Planned work &amp; estimate</p>
                 <p className="mb-2 text-xs text-text-muted">
                   This opens the invoice now. Anything the technician adds later is added to it
@@ -466,7 +466,7 @@ export function CheckInWizard({
                   ))}
                 </div>
               </div>
-              <div>
+              <div data-tour="checkin-diagram">
                 <p className="mb-2 text-sm font-medium text-text">Damage diagram</p>
                 <DamageDiagram markers={damages} onChange={setDamages} />
               </div>

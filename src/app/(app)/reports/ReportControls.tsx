@@ -34,12 +34,22 @@ export function ReportControls() {
           Last {n} days
         </button>
       ))}
-      <a
-        href={`/reports/export?range=${active}`}
-        className="ml-auto rounded-[var(--radius)] border border-border px-3 py-1.5 text-sm hover:bg-surface-2"
-      >
-        Download CSV
-      </a>
+      <div className="ml-auto flex gap-2">
+        <a
+          href={`/print/report?range=${active}`}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-[var(--radius)] bg-brand px-3 py-1.5 text-sm font-medium text-brand-fg hover:bg-brand-hover"
+        >
+          PDF
+        </a>
+        <a
+          href={`/reports/export?range=${active}`}
+          className="rounded-[var(--radius)] border border-border px-3 py-1.5 text-sm hover:bg-surface-2"
+        >
+          CSV
+        </a>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 267" fill="none" stroke="#5b6474" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+  <g fill="#e9ecf2">
+    <rect x="70" y="52" width="24" height="40" rx="9"/>
+    <rect x="306" y="52" width="24" height="40" rx="9"/>
+    <rect x="70" y="175" width="24" height="40" rx="9"/>
+    <rect x="306" y="175" width="24" height="40" rx="9"/>
+  </g>
+  <path d="M200 14
+           C160 14 133 20 124 34
+           C100 42 92 62 92 92
+           L92 175 C92 215 105 238 128 248
+           C142 256 170 260 200 260
+           C230 260 258 256 272 248
+           C295 238 308 215 308 175
+           L308 92 C308 62 300 42 276 34
+           C267 20 240 14 200 14 Z" fill="#f4f6fa"/>
+  <path d="M140 62 L260 62 L246 108 L154 108 Z" fill="#cdd3de"/>
+  <rect x="150" y="112" width="100" height="52" rx="6" fill="#cdd3de"/>
+  <path d="M154 168 L246 168 L262 214 L138 214 Z" fill="#cdd3de"/>
+  <path d="M92 84 l-14 -6 l0 13 z" fill="#e9ecf2"/>
+  <path d="M308 84 l14 -6 l0 13 z" fill="#e9ecf2"/>
+  <line x1="150" y1="34" x2="250" y2="34"/>
+  <line x1="150" y1="240" x2="250" y2="240"/>
+  <line x1="128" y1="138" x2="272" y2="138" stroke-dasharray="4 6" stroke-width="1.6"/>
+</svg>

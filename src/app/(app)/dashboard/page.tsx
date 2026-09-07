@@ -56,6 +56,7 @@ export default async function DashboardPage() {
     { data: openTime },
     { data: recent },
     { data: awaitingPayment },
+    { count: checkedOutToday },
   ] = await Promise.all([
     supabase
       .from("work_orders")
@@ -88,6 +89,12 @@ export default async function DashboardPage() {
       .eq("garage_id", gid)
       .in("status", ["repair_completed", "quality_check", "ready_for_payment"])
       .order("completed_at", { ascending: true }),
+    supabase
+      .from("work_orders")
+      .select("id", { count: "exact", head: true })
+      .eq("garage_id", gid)
+      .eq("status", "checked_out")
+      .gte("checked_out_at", todayStart),
   ]);
 
   const sum = (rows: { amount: number; is_refund: boolean }[] | null) =>
@@ -102,6 +109,7 @@ export default async function DashboardPage() {
   const workshopCards = [
     { label: "Vehicles in garage", value: (openOrders ?? []).length, href: "/workshop/jobs", tone: "blue" as const },
     { label: "Checked in today", value: checkedInToday ?? 0, tone: "gray" as const },
+    { label: "Checked out today", value: checkedOutToday ?? 0, href: "/workshop/jobs?scope=closed", tone: "gray" as const },
     { label: "Awaiting inspection", value: byStatus(["awaiting_inspection"]), href: "/workshop/jobs?status=awaiting_inspection", tone: "amber" as const },
     { label: "In progress", value: byStatus(["in_progress"]), href: "/workshop/jobs?status=in_progress", tone: "violet" as const },
     { label: "Awaiting parts", value: byStatus(["awaiting_parts"]), tone: "amber" as const },

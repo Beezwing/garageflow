@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/primitives";
 import { CheckInWizard } from "@/components/checkin/CheckInWizard";
+import { TourButton } from "@/components/tour/AppTour";
 
 export const metadata = { title: "Vehicle check-in" };
 
@@ -74,6 +75,7 @@ export default async function CheckInPage({
       <PageHeader
         title="Vehicle check-in"
         description="Customer → vehicle → condition → work order. Takes about two minutes."
+        actions={<TourButton tour="checkin" label="How this works" />}
       />
       <CheckInWizard
         garageId={ctx.garage.id}

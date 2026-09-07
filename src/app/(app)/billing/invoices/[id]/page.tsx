@@ -17,6 +17,7 @@ import {
   Td,
 } from "@/components/ui/primitives";
 import { RemoveItem, AddItem, RecordPayment, StatusControls } from "./InvoiceActions";
+import { TourButton } from "@/components/tour/AppTour";
 
 const TONE: Record<string, "gray" | "amber" | "green" | "red" | "blue"> = {
   draft: "gray",
@@ -73,12 +74,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             ) : null}
           </>
         }
-        actions={<Badge tone={TONE[status] ?? "gray"}>{status}</Badge>}
+        actions={
+          <div className="flex items-center gap-2">
+            <TourButton tour="payment" label="How to take payment" />
+            <Badge tone={TONE[status] ?? "gray"}>{status}</Badge>
+          </div>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card>
+          <Card data-tour="invoice-items">
             <CardHeader>
               <CardTitle>Line items</CardTitle>
             </CardHeader>
@@ -131,7 +137,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             ) : null}
           </Card>
 
-          <Card>
+          <Card data-tour="invoice-payment">
             <CardHeader>
               <CardTitle>Payments</CardTitle>
             </CardHeader>
@@ -177,7 +183,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="space-y-4">
-          <Card>
+          <Card data-tour="invoice-summary">
             <CardHeader>
               <CardTitle>Summary</CardTitle>
             </CardHeader>
@@ -199,7 +205,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </CardBody>
           </Card>
 
-          <StatusControls invoiceId={id} status={status} workOrderId={w?.id ?? null} />
+          <div data-tour="invoice-actions">
+            <StatusControls invoiceId={id} status={status} workOrderId={w?.id ?? null} />
+          </div>
         </div>
       </div>
     </div>
