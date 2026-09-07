@@ -29,7 +29,7 @@ export default async function StaffPage() {
   const [{ data: members }, { data: invites }] = await Promise.all([
     supabase
       .from("memberships")
-      .select("id, role, status, user_id, created_at, profile:profiles(full_name, phone)")
+      .select("id, role, status, user_id, created_at")
       .eq("garage_id", ctx.garage.id)
       .order("created_at"),
     supabase
@@ -39,6 +39,16 @@ export default async function StaffPage() {
       .is("accepted_at", null)
       .order("created_at", { ascending: false }),
   ]);
+
+  // profiles has no direct FK from memberships (both reference auth.users), so
+  // PostgREST can't embed it — fetch names separately and join in memory.
+  const memberIds = (members ?? []).map((m) => m.user_id as string);
+  const { data: profiles } = memberIds.length
+    ? await supabase.from("profiles").select("id, full_name, phone").in("id", memberIds)
+    : { data: [] as { id: string; full_name: string | null }[] };
+  const profileById = new Map(
+    ((profiles ?? []) as { id: string; full_name: string | null }[]).map((p) => [p.id, p]),
+  );
 
   return (
     <div className="space-y-6">
@@ -58,7 +68,7 @@ export default async function StaffPage() {
             </thead>
             <tbody>
               {(members ?? []).map((m) => {
-                const p = m.profile as unknown as { full_name: string | null } | null;
+                const p = profileById.get(m.user_id as string) ?? null;
                 return (
                   <StaffRow
                     key={m.id as string}
