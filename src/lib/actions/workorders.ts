@@ -6,7 +6,46 @@ import { requireGarageContext } from "@/lib/auth";
 import { assertCan, can } from "@/lib/permissions";
 import { canTransition } from "@/lib/status";
 import { writeAuditLog } from "@/lib/audit";
+import { notifyCustomer, type CustomerEvent } from "@/lib/notifications";
 import type { WorkOrderStatus } from "@/types/domain";
+
+async function notifyForStatus(woId: string, to: WorkOrderStatus) {
+  const map: Partial<Record<WorkOrderStatus, CustomerEvent>> = {
+    in_progress: "repair_started",
+    repair_completed: "repair_completed",
+    ready_for_pickup: "ready_for_pickup",
+    ready_for_payment: "invoice_ready",
+  };
+  const event = map[to];
+  if (!event) return;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("work_orders")
+      .select("garage_id, number, customer:customers(id, name, email), vehicle:vehicles(make, model), garage:garages(name)")
+      .eq("id", woId)
+      .maybeSingle();
+    const c = data?.customer as unknown as { id: string; name: string; email: string | null } | null;
+    const v = data?.vehicle as unknown as { make: string; model: string } | null;
+    const g = data?.garage as unknown as { name: string } | null;
+    if (!c) return;
+    await notifyCustomer({
+      garageId: data!.garage_id as string,
+      customerId: c.id,
+      workOrderId: woId,
+      event,
+      template: {
+        name: c.name.split(" ")[0],
+        vehicle: v ? `${v.make ?? ""} ${v.model ?? ""}`.trim() : "vehicle",
+        jobNumber: data!.number as string,
+        garage: g?.name ?? "your garage",
+      },
+      to: c.email ?? undefined,
+    });
+  } catch {
+    /* notifications never block */
+  }
+}
 
 async function loadWO(id: string) {
   const ctx = await requireGarageContext();
@@ -60,6 +99,7 @@ export async function setWorkOrderStatus(id: string, to: WorkOrderStatus, reason
     entity_type: "work_order",
     entity_id: id,
   });
+  await notifyForStatus(id, to);
   revalidateWO(id);
 }
 

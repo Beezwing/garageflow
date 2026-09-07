@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { getPortalContext } from "@/lib/portal";
 import { OnboardingForm } from "./OnboardingForm";
 
 export const metadata = { title: "Set up your garage" };
@@ -7,6 +8,8 @@ export const metadata = { title: "Set up your garage" };
 export default async function OnboardingPage() {
   const ctx = await requireUser();
   if (ctx.memberships.length > 0) redirect("/dashboard");
+  const portal = await getPortalContext();
+  if (portal && portal.customers.length > 0) redirect("/portal");
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-4 py-10">

@@ -80,7 +80,9 @@ export default async function AdminPage() {
                     return (
                       <tr key={g.id as string} className="hover:bg-surface-2">
                         <Td>
-                          <span className="font-medium text-text">{g.name as string}</span>
+                          <a href={`/admin/garages/${g.id}`} className="font-medium text-brand hover:underline">
+                            {g.name as string}
+                          </a>
                           <span className="ml-1 text-xs text-text-subtle">/{g.slug as string}</span>
                         </Td>
                         <Td className="text-text-muted">{plan?.name ?? "—"}</Td>

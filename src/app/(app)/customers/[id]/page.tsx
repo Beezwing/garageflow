@@ -106,6 +106,23 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         </Card>
       ) : null}
 
+      <Card className="mt-4">
+        <CardBody className="text-sm">
+          <p className="font-medium text-text">Customer portal</p>
+          {customer.portal_user_id ? (
+            <p className="mt-1 text-[var(--tone-green-fg)]">Connected — this customer can track repairs online.</p>
+          ) : customer.email ? (
+            <p className="mt-1 text-text-muted">
+              Not connected yet. The customer can sign up at{" "}
+              <span className="font-mono">/portal/login</span> using{" "}
+              <strong>{customer.email as string}</strong> and they&apos;ll be linked automatically.
+            </p>
+          ) : (
+            <p className="mt-1 text-text-muted">Add an email address to let this customer use the portal.</p>
+          )}
+        </CardBody>
+      </Card>
+
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Vehicles</CardTitle>

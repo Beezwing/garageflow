@@ -18,7 +18,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
           <div className="flex items-center gap-4 text-sm">
             <Link href="/admin" className="text-text-muted hover:text-text">
-              Overview
+              Garages
+            </Link>
+            <Link href="/admin/plans" className="text-text-muted hover:text-text">
+              Plans
             </Link>
             {ctx.memberships.length > 0 ? (
               <Link href="/dashboard" className="text-text-muted hover:text-text">

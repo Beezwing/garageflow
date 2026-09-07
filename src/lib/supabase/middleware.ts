@@ -54,7 +54,8 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublic && pathname !== "/") {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    // portal visitors land on the portal login, staff on the app login
+    url.pathname = pathname.startsWith("/portal") ? "/portal/login" : "/login";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }

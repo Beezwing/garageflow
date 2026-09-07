@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireGarageContext } from "@/lib/auth";
 import { assertCan } from "@/lib/permissions";
+import { notifyCustomer } from "@/lib/notifications";
 
 export interface CheckInPayload {
   customer_id?: string | null;
@@ -134,6 +135,34 @@ export async function submitCheckIn(payload: CheckInPayload): Promise<{ error?: 
       staff_signature: payload.acknowledgement.staff_signature ?? null,
       staff_user_id: ctx.userId,
     });
+  }
+
+  // notify the customer (queued; mock unless a provider is configured)
+  try {
+    const { data: info } = await supabase
+      .from("work_orders")
+      .select("customer:customers(id, name, email), vehicle:vehicles(make, model)")
+      .eq("id", woId)
+      .maybeSingle();
+    const cust = (info?.customer as unknown as { id: string; name: string; email: string | null }) ?? null;
+    const veh = (info?.vehicle as unknown as { make: string; model: string }) ?? null;
+    if (cust) {
+      await notifyCustomer({
+        garageId: ctx.garage.id,
+        customerId: cust.id,
+        workOrderId: woId,
+        event: "checked_in",
+        template: {
+          name: cust.name.split(" ")[0],
+          vehicle: veh ? `${veh.make ?? ""} ${veh.model ?? ""}`.trim() : "vehicle",
+          jobNumber: result.number,
+          garage: ctx.garage.name,
+        },
+        to: cust.email ?? undefined,
+      });
+    }
+  } catch {
+    /* never block check-in on a notification */
   }
 
   revalidatePath("/workshop/jobs");
