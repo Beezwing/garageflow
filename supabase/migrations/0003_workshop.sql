@@ -21,6 +21,7 @@ create table if not exists public.services (
   id                uuid primary key default gen_random_uuid(),
   garage_id         uuid not null references public.garages(id) on delete cascade,
   category_id       uuid references public.service_categories(id) on delete set null,
+  category          text,
   name              text not null,
   description       text,
   default_price     numeric(12,2) not null default 0,
