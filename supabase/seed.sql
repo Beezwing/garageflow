@@ -62,23 +62,23 @@ begin
   -- helper: build invoice from a work order's lines
   create or replace function pg_temp.makeinvoice(p_wo uuid)
   returns uuid language plpgsql as $f$
-  declare w public.work_orders%rowtype; inv uuid; seq bigint; num text; rate numeric;
+  declare w public.work_orders%rowtype; inv uuid; seq bigint; num text; v_rate numeric;
   begin
     select * into w from public.work_orders where id = p_wo;
-    select coalesce(tax_rate,0) into rate from public.garages where id = w.garage_id;
+    select coalesce(tax_rate,0) into v_rate from public.garages where id = w.garage_id;
     seq := public.next_counter(w.garage_id, 'invoice:' || to_char(now(),'YYYY'));
     num := 'INV-' || to_char(now(),'YYYY') || '-' || lpad(seq::text, 6, '0');
     insert into public.invoices (garage_id, number, work_order_id, customer_id, status, tax_rate)
-    values (w.garage_id, num, p_wo, w.customer_id, 'draft', rate) returning id into inv;
+    values (w.garage_id, num, p_wo, w.customer_id, 'draft', v_rate) returning id into inv;
     insert into public.invoice_items (garage_id, invoice_id, kind, description, quantity, unit_price, amount, source_type, source_id)
-      select garage_id, inv, 'part', description, quantity, unit_price, amount, 'work_order_parts', id
-        from public.work_order_parts where work_order_id = p_wo;
+      select wop.garage_id, inv, 'part', wop.description, wop.quantity, wop.unit_price, wop.amount, 'work_order_parts', wop.id
+        from public.work_order_parts wop where wop.work_order_id = p_wo;
     insert into public.invoice_items (garage_id, invoice_id, kind, description, quantity, unit_price, amount, source_type, source_id)
-      select garage_id, inv, 'labor', description, hours, rate, amount, 'work_order_labor', id
-        from public.work_order_labor where work_order_id = p_wo;
+      select wol.garage_id, inv, 'labor', wol.description, wol.hours, wol.rate, wol.amount, 'work_order_labor', wol.id
+        from public.work_order_labor wol where wol.work_order_id = p_wo;
     insert into public.invoice_items (garage_id, invoice_id, kind, description, quantity, unit_price, amount, source_type, source_id)
-      select garage_id, inv, 'service', description, quantity, unit_price, amount, 'work_order_services', id
-        from public.work_order_services where work_order_id = p_wo;
+      select wos.garage_id, inv, 'service', wos.description, wos.quantity, wos.unit_price, wos.amount, 'work_order_services', wos.id
+        from public.work_order_services wos where wos.work_order_id = p_wo;
     perform public.recalc_invoice(inv);
     return inv;
   end $f$;
