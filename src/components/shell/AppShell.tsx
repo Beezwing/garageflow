@@ -9,6 +9,7 @@ import { initials } from "@/lib/format";
 import type { MembershipRole } from "@/types/domain";
 import { NAV } from "./nav";
 import { GarageSwitcher } from "./GarageSwitcher";
+import { AppTour } from "@/components/tour/AppTour";
 
 interface ShellGarage {
   id: string;
@@ -23,6 +24,7 @@ export function AppShell({
   garage,
   garages,
   isPlatformAdmin,
+  tourPending,
 }: {
   children: React.ReactNode;
   role: MembershipRole;
@@ -31,6 +33,7 @@ export function AppShell({
   garage: ShellGarage;
   garages: ShellGarage[];
   isPlatformAdmin: boolean;
+  tourPending?: boolean;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -58,6 +61,7 @@ export function AppShell({
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    data-tour={item.href}
                     className={cn(
                       "block rounded-[var(--radius)] px-2 py-1.5 text-sm transition-colors",
                       active
@@ -136,6 +140,8 @@ export function AppShell({
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">{children}</main>
       </div>
+
+      <AppTour role={role} autoStart={Boolean(tourPending)} />
     </div>
   );
 }
@@ -152,7 +158,7 @@ function UserMenu({
   isPlatformAdmin: boolean;
 }) {
   return (
-    <div className="border-t border-border p-3">
+    <div className="border-t border-border p-3" data-tour="user-menu">
       {isPlatformAdmin ? (
         <Link
           href="/admin"
@@ -170,7 +176,14 @@ function UserMenu({
           <p className="truncate text-xs text-text-subtle">{ROLE_LABELS[role]}</p>
         </div>
       </div>
-      <form action="/auth/sign-out" method="post" className="mt-2">
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new Event("gf:start-tour"))}
+        className="mt-2 w-full rounded-[var(--radius)] px-2 py-1.5 text-left text-xs text-text-muted hover:bg-surface-2 hover:text-text"
+      >
+        Replay guided tour
+      </button>
+      <form action="/auth/sign-out" method="post">
         <button
           type="submit"
           className="w-full rounded-[var(--radius)] px-2 py-1.5 text-left text-xs text-text-muted hover:bg-surface-2 hover:text-text"

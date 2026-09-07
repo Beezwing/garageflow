@@ -1,13 +1,11 @@
 -- ============================================================================
--- GarageFlow — FULL SCHEMA SETUP (migrations 0001–0007 concatenated)
+-- GarageFlow — FULL SCHEMA SETUP (migrations 0001–0008 concatenated)
 -- Paste this whole file into the Supabase SQL Editor and press Run.
--- Then run seed.sql separately for demo data (optional).
+-- Then run seed.sql for demo data, and fix_auth_tokens.sql if you seed.
 -- ============================================================================
 
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0001_foundation.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0001_foundation.sql
 
 -- ============================================================================
 -- GarageFlow — 0001 Foundation
@@ -372,9 +370,7 @@ values
   ('enterprise', 'Enterprise',  0,      0,      '{"users":-1,"vehicles":-1,"storage_mb":-1}',      '{"reports":true,"customer_portal":true,"inventory":true,"api":true,"sso":true}', 3)
 on conflict (code) do nothing;
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0002_vehicles_workorders.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0002_vehicles_workorders.sql
 
 -- ============================================================================
 -- GarageFlow — 0002 Customers, Vehicles, Work Orders, Inspections, Photos
@@ -730,9 +726,7 @@ end $$;
 grant execute on function public.check_in_vehicle(jsonb) to authenticated;
 grant execute on function public.next_counter(uuid, text) to authenticated;
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0003_workshop.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0003_workshop.sql
 
 -- ============================================================================
 -- GarageFlow — 0003 Workshop: services, tasks, technician assignments, time
@@ -982,9 +976,7 @@ end $$;
 grant execute on function public.start_time_entry(uuid, uuid, text) to authenticated;
 grant execute on function public.stop_time_entry(uuid) to authenticated;
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0004_approvals_notifications.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0004_approvals_notifications.sql
 
 -- ============================================================================
 -- GarageFlow — 0004 Additional work, customer approvals, overrides, notifications
@@ -1227,9 +1219,7 @@ end $$;
 grant execute on function public.record_customer_approval(jsonb) to authenticated;
 grant execute on function public.create_override(jsonb) to authenticated;
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0005_inventory.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0005_inventory.sql
 
 -- ============================================================================
 -- GarageFlow — 0005 Suppliers, Parts, Inventory transactions, Work-order parts
@@ -1446,9 +1436,7 @@ end $$;
 grant execute on function public.adjust_stock(jsonb) to authenticated;
 grant execute on function public.use_part_on_work_order(jsonb) to authenticated;
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0006_billing_quality_checkout.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0006_billing_quality_checkout.sql
 
 -- ============================================================================
 -- GarageFlow — 0006 Invoices, Payments, Quality inspection, Checkout
@@ -1757,9 +1745,7 @@ end $$;
 
 grant execute on function public.check_out_vehicle(jsonb) to authenticated;
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
--- FILE: migrations/0007_storage_and_views.sql
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- >>>> FILE: migrations/0007_storage_and_views.sql
 
 -- ============================================================================
 -- GarageFlow — 0007 Storage bucket + policies, reporting views
@@ -1879,3 +1865,22 @@ begin
   return v_inv.garage_id;
 end $$;
 grant execute on function public.accept_invitation(text) to authenticated;
+
+-- >>>> FILE: migrations/0008_user_prefs.sql
+
+-- ============================================================================
+-- GarageFlow — 0008 user preferences: onboarding tour + service category column
+-- ============================================================================
+
+alter table public.profiles add column if not exists tour_completed_at timestamptz;
+alter table public.profiles add column if not exists onboarded_at timestamptz;
+
+-- services.category (denormalised label alongside category_id) — also added in 0003
+alter table public.services add column if not exists category text;
+
+-- Let a user mark their own tour complete without a broader profile update path.
+create or replace function public.complete_tour()
+returns void language sql security definer set search_path = public as $$
+  update public.profiles set tour_completed_at = now() where id = auth.uid();
+$$;
+grant execute on function public.complete_tour() to authenticated;

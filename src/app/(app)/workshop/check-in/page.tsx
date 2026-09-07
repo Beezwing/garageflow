@@ -1,11 +1,88 @@
-import { PhaseStub } from "@/components/PhaseStub";
+import { redirect } from "next/navigation";
+import { requireGarageContext } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { can } from "@/lib/permissions";
+import { PageHeader } from "@/components/ui/primitives";
+import { CheckInWizard } from "@/components/checkin/CheckInWizard";
+
 export const metadata = { title: "Vehicle check-in" };
-export default function Page() {
+
+const DEFAULT_CHECKLIST = [
+  "Front bumper",
+  "Rear bumper",
+  "Hood",
+  "Windshield",
+  "Headlights",
+  "Tail lights",
+  "Tyres & wheels",
+  "Body panels",
+  "Seats & interior",
+  "Dashboard warning lights",
+  "Radio / infotainment",
+  "A/C",
+  "Engine oil level",
+  "Coolant level",
+  "Battery",
+  "Visible leaks",
+  "Personal belongings removed",
+];
+
+export default async function CheckInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ customer?: string; vehicle?: string }>;
+}) {
+  const ctx = await requireGarageContext();
+  if (!can(ctx.role, "vehicle.checkin")) redirect("/dashboard");
+
+  const { customer, vehicle } = await searchParams;
+  const supabase = await createClient();
+
+  const [{ data: customers }, { data: vehicles }, { data: template }] = await Promise.all([
+    supabase
+      .from("customers")
+      .select("id, name, phone")
+      .eq("garage_id", ctx.garage.id)
+      .is("deleted_at", null)
+      .order("name"),
+    supabase
+      .from("vehicles")
+      .select("id, customer_id, make, model, year, license_plate")
+      .eq("garage_id", ctx.garage.id)
+      .is("deleted_at", null),
+    supabase
+      .from("checklist_templates")
+      .select("items")
+      .eq("garage_id", ctx.garage.id)
+      .eq("kind", "inspection")
+      .eq("is_default", true)
+      .maybeSingle(),
+  ]);
+
+  const checklistItems = ((template?.items as string[]) ?? []).length
+    ? (template!.items as string[])
+    : DEFAULT_CHECKLIST;
+
   return (
-    <PhaseStub
-      title="Vehicle check-in"
-      phase={2}
-      summary="Fast, mobile-friendly intake: find or create the customer and vehicle, capture complaint and condition, run the inspection checklist and damage diagram, take photos, get the customer's acknowledgement, and open a numbered work order."
-    />
+    <div data-tour="checkin-page">
+      <PageHeader
+        title="Vehicle check-in"
+        description="Customer → vehicle → condition → work order. Takes about two minutes."
+      />
+      <CheckInWizard
+        garageId={ctx.garage.id}
+        garageName={ctx.garage.name}
+        customers={(customers ?? []) as { id: string; name: string; phone: string | null }[]}
+        vehicles={((vehicles ?? []) as Record<string, unknown>[]).map((v) => ({
+          id: v.id as string,
+          customer_id: v.customer_id as string,
+          label: `${v.year ?? ""} ${v.make ?? ""} ${v.model ?? ""}`.trim() || "Vehicle",
+          plate: (v.license_plate as string) ?? null,
+        }))}
+        checklistItems={checklistItems}
+        preselectCustomer={customer}
+        preselectVehicle={vehicle}
+      />
+    </div>
   );
 }
