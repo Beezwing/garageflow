@@ -53,11 +53,16 @@ export function CheckoutForm({
   const [overrideReason, setOverrideReason] = React.useState("");
 
   const needsOverride = balance > 0;
-  const ready =
-    form.collected_by_name.trim() &&
-    form.id_verified &&
-    CHECKS.filter((c) => c !== "Invoice settled").every((c) => checked[c]) &&
-    (!needsOverride || overrideReason.trim().length > 3);
+
+  // Hard requirements to release. The checklist is recorded but advisory —
+  // unticked items surface as a warning, not a block.
+  const blockers: string[] = [];
+  if (!form.collected_by_name.trim()) blockers.push("who is collecting the vehicle");
+  if (!form.id_verified) blockers.push("confirm you verified their ID");
+  if (needsOverride && overrideReason.trim().length <= 3) blockers.push("an override reason for the outstanding balance");
+  const ready = blockers.length === 0;
+
+  const unticked = CHECKS.filter((c) => !checked[c]);
 
   async function submit() {
     setPending(true);
@@ -154,9 +159,19 @@ export function CheckoutForm({
           )
         ) : null}
 
+        {unticked.length > 0 && ready ? (
+          <p className="rounded-[var(--radius)] bg-[var(--tone-amber-bg)] px-3 py-2 text-xs text-[var(--tone-amber-fg)]">
+            Not ticked: {unticked.join(", ")}. You can still release the vehicle — the checklist is saved as-is.
+          </p>
+        ) : null}
+
         <Button className="w-full" disabled={!ready || pending} onClick={submit}>
           {pending ? "Releasing…" : needsOverride ? "Override & release vehicle" : "Release vehicle"}
         </Button>
+
+        {!ready ? (
+          <p className="text-center text-xs text-text-muted">Still need: {blockers.join("; ")}.</p>
+        ) : null}
       </CardBody>
     </Card>
   );

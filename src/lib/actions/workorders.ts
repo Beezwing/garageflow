@@ -334,6 +334,9 @@ export async function requestAdditionalWork(
     status: "pending",
   });
   if (error) throw new Error(error.message);
+  if (wo.status === "in_progress") {
+    await supabase.from("work_orders").update({ status: "awaiting_customer_approval" }).eq("id", id);
+  }
   await supabase.from("notifications").insert({
     garage_id: wo.garage_id,
     roles: ["garage_admin", "supervisor", "receptionist"],
@@ -343,6 +346,20 @@ export async function requestAdditionalWork(
     entity_id: id,
   });
   revalidateWO(id);
+}
+
+/** After every additional-work decision, if none are left pending, resume work. */
+async function resumeWorkIfClear(supabase: Awaited<ReturnType<typeof createClient>>, woId: string) {
+  const { data: wo } = await supabase.from("work_orders").select("status").eq("id", woId).maybeSingle();
+  if ((wo?.status as string) !== "awaiting_customer_approval") return;
+  const { count } = await supabase
+    .from("additional_work_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("work_order_id", woId)
+    .eq("status", "pending");
+  if ((count ?? 0) === 0) {
+    await supabase.from("work_orders").update({ status: "in_progress" }).eq("id", woId);
+  }
 }
 
 export async function recordApproval(
@@ -357,6 +374,7 @@ export async function recordApproval(
   });
   if (error) throw new Error(error.message);
   void ctx;
+  await resumeWorkIfClear(supabase, woId);
   revalidateWO(woId);
 }
 
@@ -366,6 +384,7 @@ export async function overrideAdditionalWork(requestId: string, woId: string, ga
     payload: { garage_id: garageId, kind: "additional_work", work_order_id: woId, request_id: requestId, reason, amount: amount ?? null },
   });
   if (error) throw new Error(error.message);
+  await resumeWorkIfClear(supabase, woId);
   revalidateWO(woId);
 }
 

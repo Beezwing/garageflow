@@ -125,6 +125,15 @@ begin
     set status = case when payload->>'decision' = 'approved' then 'approved' else 'declined' end
     where id = v_req.id;
 
+  -- resume work if this cleared the last pending request
+  if not exists (
+    select 1 from public.additional_work_requests
+    where work_order_id = v_req.work_order_id and status = 'pending'
+  ) then
+    update public.work_orders set status = 'in_progress'
+      where id = v_req.work_order_id and status = 'awaiting_customer_approval';
+  end if;
+
   insert into public.notifications (garage_id, roles, title, body, entity_type, entity_id)
   values (v_req.garage_id, array['garage_admin','supervisor','receptionist']::membership_role[],
           'Customer ' || (payload->>'decision') || ' additional work',

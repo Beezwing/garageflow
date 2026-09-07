@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
+import { CameraCapture } from "./CameraCapture";
 
 export interface UploadedPhoto {
   url: string;
@@ -28,13 +29,14 @@ export function PhotoUploader({
   const toast = useToast();
   const [busy, setBusy] = React.useState(false);
   const [category, setCategory] = React.useState(CATEGORIES[0]);
+  const [camOpen, setCamOpen] = React.useState(false);
 
-  async function handleFiles(files: FileList | null) {
-    if (!files?.length) return;
+  async function uploadFiles(files: File[]) {
+    if (!files.length) return;
     setBusy(true);
     const supabase = createClient();
     const added: UploadedPhoto[] = [];
-    for (const file of Array.from(files)) {
+    for (const file of files) {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${garageId}/${folder}/${phase}-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("garage-media").upload(path, file, {
@@ -70,19 +72,28 @@ export function PhotoUploader({
             <option key={c}>{c}</option>
           ))}
         </select>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => setCamOpen(true)}
+          className="rounded-[var(--radius)] bg-brand px-3 py-1.5 text-sm font-medium text-brand-fg hover:bg-brand-hover disabled:opacity-50"
+        >
+          📷 Take photo
+        </button>
         <label className="cursor-pointer rounded-[var(--radius)] border border-border bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-2">
-          {busy ? "Uploading…" : "Add photos"}
+          {busy ? "Uploading…" : "Choose files"}
           <input
             type="file"
             accept="image/*"
             multiple
-            capture="environment"
             className="hidden"
             disabled={busy}
-            onChange={(e) => handleFiles(e.target.files)}
+            onChange={(e) => e.target.files && uploadFiles(Array.from(e.target.files))}
           />
         </label>
       </div>
+
+      <CameraCapture open={camOpen} onClose={() => setCamOpen(false)} onCapture={(f) => uploadFiles([f])} />
 
       {photos.length > 0 ? (
         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">

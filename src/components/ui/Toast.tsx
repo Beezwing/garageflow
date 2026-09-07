@@ -19,12 +19,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const push = React.useCallback((message: string, tone: ToastTone = "info") => {
     const id = Date.now() + Math.random();
-    setToasts((t) => [...t, { id, message, tone }]);
+    setToasts((t) => {
+      // de-dupe identical messages already on screen (prevents effect-loop spam)
+      if (t.some((x) => x.message === message && x.tone === tone)) return t;
+      return [...t, { id, message, tone }];
+    });
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4500);
   }, []);
 
+  const value = React.useMemo(() => ({ push }), [push]);
+
   return (
-    <ToastCtx.Provider value={{ push }}>
+    <ToastCtx.Provider value={value}>
       {children}
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4">
         {toasts.map((t) => (

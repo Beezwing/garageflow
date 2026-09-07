@@ -45,10 +45,12 @@ export const WORK_ORDER_STATUS_TONE: Record<WorkOrderStatus, BadgeTone> = {
  */
 const TRANSITIONS: Record<WorkOrderStatus, WorkOrderStatus[]> = {
   checked_in: ["awaiting_inspection", "cancelled"],
-  awaiting_inspection: ["inspected", "cancelled"],
-  inspected: ["assignment_pending", "assigned", "cancelled"],
+  awaiting_inspection: ["inspected", "assigned", "cancelled"],
+  // assignment_pending kept in the enum for flexibility but not part of the
+  // normal path — assigning a technician moves straight to "assigned".
+  inspected: ["assigned", "in_progress", "cancelled"],
   assignment_pending: ["assigned", "cancelled"],
-  assigned: ["in_progress", "assignment_pending", "cancelled"],
+  assigned: ["in_progress", "inspected", "cancelled"],
   in_progress: [
     "awaiting_parts",
     "awaiting_customer_approval",
@@ -58,9 +60,11 @@ const TRANSITIONS: Record<WorkOrderStatus, WorkOrderStatus[]> = {
   ],
   awaiting_parts: ["in_progress", "cancelled"],
   awaiting_customer_approval: ["in_progress", "cancelled"],
-  repair_completed: ["quality_check", "in_progress", "cancelled"],
+  // QC can be skipped for small jobs by going straight to ready_for_payment
+  repair_completed: ["quality_check", "ready_for_payment", "in_progress", "cancelled"],
   quality_check: ["ready_for_payment", "repair_completed", "cancelled"],
-  ready_for_payment: ["paid", "ready_for_pickup", "cancelled"],
+  // payment status lives on the invoice; the WO goes straight to ready_for_pickup
+  ready_for_payment: ["ready_for_pickup", "cancelled"],
   paid: ["ready_for_pickup"],
   ready_for_pickup: ["checked_out"],
   checked_out: [],

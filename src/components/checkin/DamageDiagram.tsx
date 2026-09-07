@@ -177,35 +177,113 @@ export function DamageDiagram({
 }
 
 function CarShape({ view }: { view: string }) {
-  const stroke = "var(--text-subtle)";
-  const fill = "var(--surface-2)";
+  const s = "var(--text-subtle)";
+  const body = "var(--surface-2)";
+  const glass = "var(--surface)";
+  const tyre = "var(--text-subtle)";
+  const g = { stroke: s, strokeWidth: 0.7, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+
   if (view === "top") {
     return (
-      <g stroke={stroke} strokeWidth={0.6} fill={fill}>
-        <rect x={28} y={6} width={44} height={48} rx={10} />
-        <rect x={33} y={12} width={34} height={13} rx={3} fill="var(--surface)" />
-        <rect x={33} y={34} width={34} height={14} rx={3} fill="var(--surface)" />
-        <line x1={28} y1={30} x2={72} y2={30} />
+      <g {...g}>
+        {/* wheels */}
+        <rect x={19} y={13} width={5} height={9} rx={2} fill={tyre} />
+        <rect x={76} y={13} width={5} height={9} rx={2} fill={tyre} />
+        <rect x={19} y={39} width={5} height={9} rx={2} fill={tyre} />
+        <rect x={76} y={39} width={5} height={9} rx={2} fill={tyre} />
+        {/* body */}
+        <path
+          d="M50 3
+             C40 3 33 5 31 9
+             C25 11 23 16 23 22
+             L23 40 C23 47 26 52 31 54
+             C34 56 42 57 50 57
+             C58 57 66 56 69 54
+             C74 52 77 47 77 40
+             L77 22 C77 16 75 11 69 9
+             C67 5 60 3 50 3 Z"
+          fill={body}
+        />
+        {/* windshield / roof / rear window */}
+        <path d="M35 14 L65 14 L61 24 L39 24 Z" fill={glass} />
+        <rect x={38} y={25} width={24} height={12} rx={1.5} fill={glass} />
+        <path d="M39 38 L61 38 L64 47 L36 47 Z" fill={glass} />
+        {/* mirrors */}
+        <path d="M23 20 l-3 -1.5 l0 3 z" fill={body} />
+        <path d="M77 20 l3 -1.5 l0 3 z" fill={body} />
+        {/* bonnet + boot creases */}
+        <line x1={38} y1={9} x2={62} y2={9} />
+        <line x1={38} y1={52} x2={62} y2={52} />
       </g>
     );
   }
+
   if (view === "front" || view === "rear") {
+    const isFront = view === "front";
     return (
-      <g stroke={stroke} strokeWidth={0.6} fill={fill}>
-        <rect x={22} y={18} width={56} height={26} rx={5} />
-        <rect x={30} y={22} width={40} height={12} rx={2} fill="var(--surface)" />
-        <circle cx={32} cy={45} r={4} fill="var(--text-subtle)" />
-        <circle cx={68} cy={45} r={4} fill="var(--text-subtle)" />
+      <g {...g}>
+        {/* wheels behind */}
+        <rect x={16} y={40} width={9} height={10} rx={2.5} fill={tyre} />
+        <rect x={75} y={40} width={9} height={10} rx={2.5} fill={tyre} />
+        {/* cabin + roof */}
+        <path d="M32 14 C32 10 36 8 50 8 C64 8 68 10 68 14 L68 22 L32 22 Z" fill={body} />
+        <path d="M36 15 L64 15 L64 22 L36 22 Z" fill={glass} />
+        {/* main body */}
+        <path
+          d="M18 22 L82 22 C85 22 86 24 86 27 L86 43 C86 46 84 47 81 47 L19 47 C16 47 14 46 14 43 L14 27 C14 24 15 22 18 22 Z"
+          fill={body}
+        />
+        {/* headlights / taillights */}
+        <rect x={20} y={26} width={14} height={6} rx={1.5} fill={isFront ? glass : "var(--tone-red-bg)"} />
+        <rect x={66} y={26} width={14} height={6} rx={1.5} fill={isFront ? glass : "var(--tone-red-bg)"} />
+        {/* grille / plate */}
+        <rect x={40} y={27} width={20} height={7} rx={1} fill={glass} />
+        {/* bumper */}
+        <rect x={16} y={41} width={68} height={5} rx={2} fill={glass} />
       </g>
     );
   }
-  // left / right
+
+  // side profile (left / right) — mirrored for "right"
+  const flip = view === "right";
   return (
-    <g stroke={stroke} strokeWidth={0.6} fill={fill}>
-      <path d="M12 40 L20 40 Q24 22 40 20 L64 20 Q76 22 82 34 L88 36 L88 42 L12 42 Z" />
-      <circle cx={30} cy={42} r={5} fill="var(--text-subtle)" />
-      <circle cx={72} cy={42} r={5} fill="var(--text-subtle)" />
-      <path d="M40 21 L44 33 L64 33 L62 21 Z" fill="var(--surface)" />
+    <g {...g} transform={flip ? "translate(100,0) scale(-1,1)" : undefined}>
+      {/* body silhouette */}
+      <path
+        d="M8 40
+           L14 40
+           C15 34 18 32 24 31
+           L30 22 C32 18 36 16 44 16
+           L60 16 C66 16 70 18 73 23
+           L86 27 C90 28 92 31 92 36
+           L92 40 L86 40
+           C86 45 82 48 78 48
+           C74 48 70 45 70 40
+           L30 40
+           C30 45 26 48 22 48
+           C18 48 14 45 14 40
+           L8 40 Z"
+        fill={body}
+      />
+      {/* greenhouse (windows) */}
+      <path d="M34 22 L44 18 L58 18 L64 23 L64 30 L34 30 Z" fill={glass} />
+      {/* window divider (B-pillar) */}
+      <line x1={49} y1={19} x2={49} y2={30} />
+      {/* doors */}
+      <line x1={41} y1={30} x2={41} y2={40} />
+      <line x1={58} y1={30} x2={58} y2={40} />
+      {/* door handles */}
+      <line x1={44} y1={33} x2={47} y2={33} strokeWidth={1.4} />
+      <line x1={61} y1={33} x2={64} y2={33} strokeWidth={1.4} />
+      {/* wheels + arches */}
+      <circle cx={26} cy={40} r={7} fill={tyre} />
+      <circle cx={26} cy={40} r={3} fill={body} />
+      <circle cx={74} cy={40} r={7} fill={tyre} />
+      <circle cx={74} cy={40} r={3} fill={body} />
+      <path d="M18 40 A8 8 0 0 1 34 40" fill="none" />
+      <path d="M66 40 A8 8 0 0 1 82 40" fill="none" />
+      {/* side mirror */}
+      <path d="M33 24 l-3 -2 l0 3 z" fill={body} />
     </g>
   );
 }
