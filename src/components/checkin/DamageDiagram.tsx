@@ -95,30 +95,33 @@ export function DamageDiagram({
 
       <p className="mb-2 text-xs text-text-muted">Tap the vehicle to drop a marker, then set the damage type.</p>
 
-      <div
-        ref={boxRef}
-        onClick={place}
-        className="relative aspect-[3/2] w-full cursor-crosshair select-none overflow-hidden rounded-[var(--radius)] border border-border bg-surface"
-      >
-        <VehicleImage key={view} view={view} />
+      <div className="flex justify-center rounded-[var(--radius)] border border-border bg-surface p-2">
+        {/* wrapper shrink-wraps the image so marker %s map exactly onto it */}
+        <div
+          ref={boxRef}
+          onClick={place}
+          className="relative inline-block max-h-[300px] cursor-crosshair select-none"
+        >
+          <VehicleImage key={view} view={view} />
 
-        {viewMarkers.map((m) => (
-          <button
-            key={m.id}
-            data-marker
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActive(m.id);
-            }}
-            style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%`, background: colorFor(m.damage_type) }}
-            className={cn(
-              "absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow",
-              active === m.id ? "h-5 w-5" : "h-4 w-4",
-            )}
-            title={m.damage_type}
-          />
-        ))}
+          {viewMarkers.map((m) => (
+            <button
+              key={m.id}
+              data-marker
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActive(m.id);
+              }}
+              style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%`, background: colorFor(m.damage_type) }}
+              className={cn(
+                "absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow",
+                active === m.id ? "h-5 w-5" : "h-4 w-4",
+              )}
+              title={m.damage_type}
+            />
+          ))}
+        </div>
       </div>
 
       {activeMarker ? (
@@ -195,7 +198,7 @@ function VehicleImage({ view }: { view: string }) {
   const [failed, setFailed] = React.useState(false);
   if (failed) {
     return (
-      <svg viewBox="0 0 100 66" className="pointer-events-none absolute inset-0 h-full w-full">
+      <svg viewBox="0 0 100 66" className="pointer-events-none block h-[200px] w-[300px]">
         <CarShape view={view} />
       </svg>
     );
@@ -205,7 +208,8 @@ function VehicleImage({ view }: { view: string }) {
     <img
       src={src}
       alt={`${view} view`}
-      className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+      draggable={false}
+      className="pointer-events-none block max-h-[300px] w-auto"
       onError={() => {
         if (src.endsWith(".png")) setSrc(`/vehicle/${view}.svg`);
         else setFailed(true);

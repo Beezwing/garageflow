@@ -58,6 +58,16 @@ export function CheckInWizard({
   const [pending, setPending] = React.useState(false);
   const folder = React.useMemo(() => `checkin/${crypto.randomUUID()}`, []);
 
+  // let the guided tour walk the wizard
+  React.useEffect(() => {
+    const h = (e: Event) => {
+      const n = (e as CustomEvent<number>).detail;
+      if (typeof n === "number" && n >= 0 && n <= 6) setStep(n);
+    };
+    window.addEventListener("gf:checkin-step", h);
+    return () => window.removeEventListener("gf:checkin-step", h);
+  }, []);
+
   const presetV = vehicles.find((v) => v.id === preselectVehicle);
   const [custMode, setCustMode] = React.useState<"existing" | "new">(
     preselectCustomer || presetV ? "existing" : "existing",

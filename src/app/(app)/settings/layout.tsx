@@ -16,6 +16,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
         tabs={[
           { label: "Business", href: "/settings" },
           { label: "Services & pricing", href: "/settings/services" },
+          { label: "Checklists", href: "/settings/checklists" },
           { label: "Staff", href: "/settings/staff" },
           { label: "Subscription", href: "/settings/subscription" },
         ]}

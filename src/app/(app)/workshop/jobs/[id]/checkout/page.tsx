@@ -22,9 +22,10 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     .maybeSingle();
   if (!wo) notFound();
 
-  const [{ data: invoices }, { data: quality }] = await Promise.all([
+  const [{ data: invoices }, { data: quality }, { data: tpl }] = await Promise.all([
     supabase.from("invoices").select("balance, status").eq("work_order_id", id).not("status", "in", "(cancelled,draft)"),
     supabase.from("quality_inspections").select("passed").eq("work_order_id", id).order("created_at", { ascending: false }).limit(1),
+    supabase.from("checklist_templates").select("items").eq("garage_id", ctx.garage.id).eq("kind", "checkout").eq("is_default", true).maybeSingle(),
   ]);
 
   const balance = (invoices ?? []).reduce((t, i) => t + Number(i.balance), 0);
@@ -53,6 +54,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
         qualityPassed={qualityPassed}
         canOverride={can(ctx.role, "override.perform")}
         customerName={c?.name ?? ""}
+        checks={(tpl?.items as string[]) ?? undefined}
       />
       {balance > 0 ? (
         <p className="mt-3 text-sm text-[var(--tone-amber-fg)]">

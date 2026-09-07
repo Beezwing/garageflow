@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireGarageContext } from "@/lib/auth";
 import { assertCan } from "@/lib/permissions";
+import { assertWithinPlan } from "@/lib/plan-guard";
 import { writeAuditLog } from "@/lib/audit";
 import type { MembershipRole } from "@/types/domain";
 
@@ -23,6 +24,12 @@ export async function inviteStaff(_prev: Result, formData: FormData): Promise<Re
   const role = String(formData.get("role") ?? "") as MembershipRole;
   if (!email.includes("@")) return { error: "Enter a valid email address." };
   if (!ROLES.includes(role)) return { error: "Choose a role." };
+
+  try {
+    await assertWithinPlan(ctx.garage.id, "users");
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase

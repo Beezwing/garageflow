@@ -76,9 +76,11 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
     supabase.from("memberships").select("user_id, role").eq("garage_id", gid).eq("status", "active"),
     supabase.from("services").select("id, name, default_price").eq("garage_id", gid).eq("active", true).order("name"),
     supabase.from("parts").select("id, name, part_number, price, quantity").eq("garage_id", gid).is("deleted_at", null).order("name"),
-    supabase.from("checklist_templates").select("id, name, kind").eq("garage_id", gid).in("kind", ["repair", "quality"]),
+    supabase.from("checklist_templates").select("id, name, kind, items").eq("garage_id", gid).in("kind", ["repair", "quality"]),
     supabase.from("work_order_notes").select("*").eq("work_order_id", id).order("created_at"),
   ]);
+
+  const qualityChecks = (templates ?? []).find((t) => t.kind === "quality")?.items as string[] | undefined;
 
   const memberIds = (members ?? []).map((m) => m.user_id as string);
   const { data: profiles } = memberIds.length
@@ -303,6 +305,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
                 by: q.supervisor_id ? nameById.get(q.supervisor_id as string) ?? null : null,
               }))}
               canPerform={can(ctx.role, "quality.perform")}
+              checks={qualityChecks}
             />
           ) : null}
 
@@ -378,6 +381,32 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
             }))}
             canManage={can(ctx.role, "invoice.manage")}
           />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents</CardTitle>
+            </CardHeader>
+            <CardBody className="space-y-1.5 text-sm">
+              <a href={`/print/workorder/${id}`} target="_blank" rel="noreferrer" className="block text-brand hover:underline">
+                Work order sheet (PDF)
+              </a>
+              {(invoices ?? [])[0] ? (
+                <a
+                  href={`/print/invoice/${(invoices ?? [])[0].id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block text-brand hover:underline"
+                >
+                  Invoice / receipt (PDF)
+                </a>
+              ) : null}
+              {status === "checked_out" ? (
+                <a href={`/print/checkout/${id}`} target="_blank" rel="noreferrer" className="block text-brand hover:underline">
+                  Vehicle release form (PDF)
+                </a>
+              ) : null}
+            </CardBody>
+          </Card>
 
           {(timeEntries ?? []).length ? (
             <Card>

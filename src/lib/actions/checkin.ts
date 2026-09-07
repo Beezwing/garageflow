@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireGarageContext } from "@/lib/auth";
 import { assertCan } from "@/lib/permissions";
+import { assertWithinPlan } from "@/lib/plan-guard";
 import { notifyCustomer } from "@/lib/notifications";
 
 export interface CheckInPayload {
@@ -51,6 +52,7 @@ export async function submitCheckIn(payload: CheckInPayload): Promise<{ error?: 
   const ctx = await requireGarageContext();
   try {
     assertCan(ctx.role, "vehicle.checkin");
+    if (!payload.vehicle_id) await assertWithinPlan(ctx.garage.id, "vehicles");
   } catch (e) {
     return { error: (e as Error).message };
   }

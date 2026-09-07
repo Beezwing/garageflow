@@ -9,6 +9,7 @@ import { initials } from "@/lib/format";
 import type { MembershipRole } from "@/types/domain";
 import { NAV } from "./nav";
 import { GarageSwitcher } from "./GarageSwitcher";
+import { GlobalSearch } from "./GlobalSearch";
 import { AppTour } from "@/components/tour/AppTour";
 
 interface ShellGarage {
@@ -25,6 +26,7 @@ export function AppShell({
   garages,
   isPlatformAdmin,
   tourPending,
+  unreadCount = 0,
 }: {
   children: React.ReactNode;
   role: MembershipRole;
@@ -34,6 +36,7 @@ export function AppShell({
   garages: ShellGarage[];
   isPlatformAdmin: boolean;
   tourPending?: boolean;
+  unreadCount?: number;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -63,13 +66,18 @@ export function AppShell({
                     href={item.href}
                     data-tour={item.href}
                     className={cn(
-                      "block rounded-[var(--radius)] px-2 py-1.5 text-sm transition-colors",
+                      "flex items-center justify-between rounded-[var(--radius)] px-2 py-1.5 text-sm transition-colors",
                       active
                         ? "bg-brand-soft font-medium text-brand"
                         : "text-text-muted hover:bg-surface-2 hover:text-text",
                     )}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {item.href === "/notifications" && unreadCount > 0 ? (
+                      <span className="grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[0.65rem] font-semibold text-brand-fg">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               );
@@ -90,8 +98,9 @@ export function AppShell({
           </span>
           <span className="font-semibold text-text">GarageFlow</span>
         </div>
-        <div className="border-b border-border px-3 py-3">
+        <div className="space-y-2 border-b border-border px-3 py-3">
           <GarageSwitcher current={garage} garages={garages} />
+          <GlobalSearch />
         </div>
         {nav}
         <UserMenu userName={userName} email={email} role={role} isPlatformAdmin={isPlatformAdmin} />
@@ -112,8 +121,9 @@ export function AppShell({
                 ✕
               </button>
             </div>
-            <div className="border-b border-border px-3 py-3">
+            <div className="space-y-2 border-b border-border px-3 py-3">
               <GarageSwitcher current={garage} garages={garages} />
+              <GlobalSearch />
             </div>
             {nav}
             <UserMenu
@@ -137,6 +147,14 @@ export function AppShell({
             ☰
           </button>
           <span className="truncate text-sm font-medium text-text">{garage.name}</span>
+          <Link href="/notifications" className="relative ml-auto p-1 text-text-muted" aria-label="Notifications">
+            🔔
+            {unreadCount > 0 ? (
+              <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[0.6rem] font-semibold text-brand-fg">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            ) : null}
+          </Link>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">{children}</main>
       </div>

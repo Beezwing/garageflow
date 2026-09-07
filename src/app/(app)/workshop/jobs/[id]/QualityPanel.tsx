@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader, CardTitle, Badge } from "@/components/ui/pr
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 
-const CHECKS = [
+const DEFAULT_CHECKS = [
   "Requested repairs completed",
   "Repair checklist completed",
   "Additional approved work completed",
@@ -23,11 +23,14 @@ export function QualityPanel({
   woId,
   existing,
   canPerform,
+  checks,
 }: {
   woId: string;
   existing: { id: string; passed: boolean; notes: string | null; created_at: string; by: string | null }[];
   canPerform: boolean;
+  checks?: string[];
 }) {
+  const CHECKS = checks && checks.length ? checks : DEFAULT_CHECKS;
   const router = useRouter();
   const toast = useToast();
   const [checked, setChecked] = React.useState<Record<string, boolean>>({});

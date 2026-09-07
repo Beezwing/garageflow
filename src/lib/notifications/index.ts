@@ -63,9 +63,37 @@ function resendProvider(): NotificationProvider | null {
   };
 }
 
+function twilioProvider(channel: "sms" | "whatsapp"): NotificationProvider | null {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = channel === "whatsapp" ? process.env.TWILIO_WHATSAPP_FROM : process.env.TWILIO_FROM;
+  if (!sid || !token || !from) return null;
+  return {
+    name: `twilio-${channel}`,
+    async send(msg) {
+      try {
+        const to = channel === "whatsapp" ? `whatsapp:${msg.to}` : msg.to;
+        const body = new URLSearchParams({ To: to, From: from, Body: msg.body });
+        const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body,
+        });
+        return res.ok ? { ok: true } : { ok: false, error: `twilio ${res.status}` };
+      } catch (e) {
+        return { ok: false, error: (e as Error).message };
+      }
+    },
+  };
+}
+
 function providerFor(channel: Channel): NotificationProvider {
   if (channel === "email") return resendProvider() ?? mockProvider;
-  // SMS / WhatsApp providers (Twilio, etc.) plug in here
+  if (channel === "sms") return twilioProvider("sms") ?? mockProvider;
+  if (channel === "whatsapp") return twilioProvider("whatsapp") ?? mockProvider;
   return mockProvider;
 }
 

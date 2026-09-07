@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { SignaturePad } from "@/components/checkin/SignaturePad";
 import { useToast } from "@/components/ui/Toast";
 
-const CHECKS = [
+const DEFAULT_CHECKS = [
   "Repairs completed",
   "Technician checklist completed",
   "Quality inspection completed",
@@ -27,6 +27,7 @@ export function CheckoutForm({
   qualityPassed,
   canOverride,
   customerName,
+  checks,
 }: {
   workOrderId: string;
   balance: number;
@@ -34,7 +35,9 @@ export function CheckoutForm({
   qualityPassed: boolean;
   canOverride: boolean;
   customerName: string;
+  checks?: string[];
 }) {
+  const CHECKS = checks && checks.length ? checks : DEFAULT_CHECKS;
   const router = useRouter();
   const toast = useToast();
   const [pending, setPending] = React.useState(false);

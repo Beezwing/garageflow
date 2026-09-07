@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireGarageContext } from "@/lib/auth";
 import { assertCan } from "@/lib/permissions";
+import { assertWithinPlan } from "@/lib/plan-guard";
 import { writeAuditLog } from "@/lib/audit";
 import type { ActionState } from "@/lib/actions/types";
 
@@ -41,6 +42,12 @@ export async function createVehicle(
   const data = parse(formData);
   if (!data.customer_id) return { error: "Choose an owner for this vehicle." };
   if (!data.make && !data.license_plate) return { error: "Enter at least a make or a plate." };
+
+  try {
+    await assertWithinPlan(ctx.garage.id, "vehicles");
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 
   const supabase = await createClient();
   const { data: row, error } = await supabase

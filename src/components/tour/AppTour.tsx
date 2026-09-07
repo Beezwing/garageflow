@@ -6,7 +6,7 @@ import "driver.js/dist/driver.css";
 import { createClient } from "@/lib/supabase/client";
 import type { MembershipRole } from "@/types/domain";
 
-type Step = { element?: string; title: string; description: string };
+type Step = { element?: string; title: string; description: string; wizardStep?: number };
 
 /* ------------------------------------------------------------------ */
 /* Tour definitions                                                    */
@@ -41,12 +41,53 @@ function appTour(role: MembershipRole): Step[] {
 }
 
 const checkinTour: Step[] = [
-  { title: "Checking a vehicle in", description: "Seven quick steps. It creates the numbered job card and opens the invoice." },
-  { element: '[data-tour="checkin-steps"]', title: "The steps", description: "Customer, vehicle, job details, condition, photos, sign-off, review. Move with Continue / Back." },
-  { element: '[data-tour="checkin-body"]', title: "Step 1 — customer", description: "Pick an existing customer or add a new one. New vehicles get de-duplicated on plate and VIN." },
-  { element: '[data-tour="checkin-planned"]', title: "Planned work + estimate", description: "On the Job details step, add the work you'll do and its price. This becomes the opening lines of the invoice — everything added later joins it automatically." },
-  { element: '[data-tour="checkin-diagram"]', title: "Condition & damage", description: "Run the checklist and tap the car diagram to mark any existing damage before work starts." },
-  { element: '[data-tour="checkin-submit"]', title: "Finish", description: "Review, then Check in vehicle — you land on the job card ready to assign a technician." },
+  {
+    element: '[data-tour="checkin-steps"]',
+    title: "Checking a vehicle in",
+    description: "Seven steps, shown here. This tour walks the card through each one — use Next / Back.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 0,
+    title: "Step 1 · Customer",
+    description: "Search for an existing customer, or switch to “New customer”. One person can own several vehicles.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 1,
+    title: "Step 2 · Vehicle",
+    description: "Pick one of the customer's vehicles, or add a new one. Plate and VIN are checked so you don't create duplicates.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 2,
+    title: "Step 3 · Job details + estimate",
+    description: "Complaint, priority, mileage, fuel — then “Planned work & estimate”. What you list here opens the invoice; anything added later joins it automatically.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 3,
+    title: "Step 4 · Condition",
+    description: "Run the inspection checklist and tap the car diagram to mark any existing damage before work starts.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 4,
+    title: "Step 5 · Photos",
+    description: "Take or upload before-photos by category. This protects both the garage and the customer.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 5,
+    title: "Step 6 · Sign-off",
+    description: "Optional customer and staff signatures on the recorded condition.",
+  },
+  {
+    element: '[data-tour="checkin-body"]',
+    wizardStep: 6,
+    title: "Step 7 · Review & check in",
+    description: "Confirm the summary, then Check in vehicle. You land on the job card, ready to assign a technician.",
+  },
 ];
 
 const paymentTour: Step[] = [
@@ -89,13 +130,28 @@ export function AppTour({ role, autoStart }: { role: MembershipRole; autoStart: 
     async (name: string) => {
       const { driver } = await import("driver.js");
       const all = (TOURS[name] ?? TOURS.app)(role);
-      const steps = all
-        .filter((s) => !s.element || document.querySelector(s.element))
-        .map((s) => ({ element: s.element, popover: { title: s.title, description: s.description } }));
-      if (steps.length === 0) return;
+
+      // wizard-driven tours (check-in): keep every step, navigate the wizard as
+      // the tour moves. Others: drop steps whose anchor isn't on the page.
+      const wizardDriven = all.some((s) => s.wizardStep != null);
+      const usable = wizardDriven ? all : all.filter((s) => !s.element || document.querySelector(s.element));
+      if (usable.length === 0) return;
+
+      const goto = (n?: number) => {
+        if (n == null) return;
+        window.dispatchEvent(new CustomEvent("gf:checkin-step", { detail: n }));
+      };
+
+      const steps = usable.map((s) => ({
+        element: s.element,
+        popover: { title: s.title, description: s.description },
+        onHighlightStarted: () => goto(s.wizardStep),
+      }));
+
       const d = driver({
         showProgress: true,
         allowClose: true,
+        smoothScroll: true,
         nextBtnText: "Next",
         prevBtnText: "Back",
         doneBtnText: "Got it",
