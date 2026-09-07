@@ -49,10 +49,13 @@ export function InvoicePanel({
     <Card data-tour="invoice-panel">
       <CardHeader>
         <CardTitle>Invoice</CardTitle>
+        <span className="text-xs text-text-subtle">updates live</span>
       </CardHeader>
       <CardBody className="space-y-2">
         {invoices.length === 0 ? (
-          <p className="text-sm text-text-muted">No invoice yet.</p>
+          <p className="text-sm text-text-muted">
+            The invoice builds automatically from parts, labour and services on this job.
+          </p>
         ) : (
           invoices.map((i) => (
             <Link
@@ -70,7 +73,7 @@ export function InvoicePanel({
         )}
         {canManage ? (
           <Button size="sm" variant="secondary" className="w-full" disabled={pending} onClick={generate}>
-            {invoices.some((i) => i.status === "draft") ? "Rebuild draft invoice" : "Generate invoice"}
+            {invoices.length === 0 ? "Create invoice now" : "Re-sync from job"}
           </Button>
         ) : null}
       </CardBody>

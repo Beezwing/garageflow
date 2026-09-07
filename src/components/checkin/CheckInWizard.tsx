@@ -25,19 +25,29 @@ interface Vehicle {
 
 const STEPS = ["Customer", "Vehicle", "Job details", "Condition", "Photos", "Sign-off", "Review"];
 
+interface Svc {
+  id: string;
+  name: string;
+  default_price: number;
+}
+
 export function CheckInWizard({
   garageId,
   garageName,
+  currency,
   customers,
   vehicles,
+  services,
   checklistItems,
   preselectCustomer,
   preselectVehicle,
 }: {
   garageId: string;
   garageName: string;
+  currency: string;
   customers: Customer[];
   vehicles: Vehicle[];
+  services: Svc[];
   checklistItems: string[];
   preselectCustomer?: string;
   preselectVehicle?: string;
@@ -78,6 +88,10 @@ export function CheckInWizard({
     expected_completion: "",
   });
 
+  const [planned, setPlanned] = React.useState<
+    { description: string; unit_price: string; service_id?: string }[]
+  >([]);
+
   const [checklist, setChecklist] = React.useState(
     checklistItems.map((item) => ({ section: "Inspection", item, status: "ok", notes: "" })),
   );
@@ -113,6 +127,14 @@ export function CheckInWizard({
       mileage_in: job.mileage_in || undefined,
       fuel_level_in: job.fuel_level_in || undefined,
       expected_completion: job.expected_completion || undefined,
+      planned: planned
+        .filter((p) => p.description.trim())
+        .map((p) => ({
+          service_id: p.service_id,
+          description: p.description.trim(),
+          quantity: 1,
+          unit_price: Number(p.unit_price) || 0,
+        })),
       inspection: {
         checklist,
         notes: inspNotes,
@@ -339,6 +361,73 @@ export function CheckInWizard({
                   className="w-full accent-[var(--brand)]"
                 />
               </Field>
+
+              <div>
+                <p className="mb-1 text-sm font-medium text-text">Planned work &amp; estimate</p>
+                <p className="mb-2 text-xs text-text-muted">
+                  This opens the invoice now. Anything the technician adds later is added to it
+                  automatically.
+                </p>
+                <div className="space-y-2">
+                  {planned.map((p, i) => (
+                    <div key={i} className="flex gap-2">
+                      <input
+                        value={p.description}
+                        onChange={(e) =>
+                          setPlanned(planned.map((x, xi) => (xi === i ? { ...x, description: e.target.value } : x)))
+                        }
+                        placeholder="e.g. Front brake service"
+                        className="min-w-0 flex-1 rounded-[var(--radius)] border border-border bg-surface px-2 py-1.5 text-sm"
+                      />
+                      <input
+                        type="number"
+                        value={p.unit_price}
+                        onChange={(e) =>
+                          setPlanned(planned.map((x, xi) => (xi === i ? { ...x, unit_price: e.target.value } : x)))
+                        }
+                        placeholder={currency}
+                        className="w-24 rounded-[var(--radius)] border border-border bg-surface px-2 py-1.5 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPlanned(planned.filter((_, xi) => xi !== i))}
+                        className="text-xs text-[var(--tone-red-fg)]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <select
+                      defaultValue=""
+                      onChange={(e) => {
+                        const svc = services.find((s) => s.id === e.target.value);
+                        if (svc)
+                          setPlanned([
+                            ...planned,
+                            { description: svc.name, unit_price: String(svc.default_price), service_id: svc.id },
+                          ]);
+                        e.target.value = "";
+                      }}
+                      className="rounded-[var(--radius)] border border-border bg-surface px-2 py-1.5 text-sm"
+                    >
+                      <option value="">+ from catalogue…</option>
+                      {services.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setPlanned([...planned, { description: "", unit_price: "" }])}
+                      className="rounded-[var(--radius)] border border-border bg-surface px-3 py-1.5 text-sm hover:bg-surface-2"
+                    >
+                      + custom line
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

@@ -95,25 +95,37 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   </tr>
                 </thead>
                 <tbody>
-                  {(items ?? []).map((it) => (
-                    <tr key={it.id as string}>
-                      <Td>{it.description as string}</Td>
-                      <Td className="text-text-muted capitalize">{it.kind as string}</Td>
-                      <Td className="text-right text-text-muted">{Number(it.quantity)}</Td>
-                      <Td className="text-right text-text-muted">{money(Number(it.unit_price), cur)}</Td>
-                      <Td className="text-right font-medium">{money(Number(it.amount), cur)}</Td>
-                      {status === "draft" ? (
-                        <Td className="text-right">
-                          <RemoveItem invoiceId={id} itemId={it.id as string} />
+                  {(items ?? []).map((it) => {
+                    const fromJob = ["work_order_parts", "work_order_labor", "work_order_services"].includes(
+                      it.source_type as string,
+                    );
+                    return (
+                      <tr key={it.id as string}>
+                        <Td>
+                          {it.description as string}
+                          {fromJob ? <span className="ml-1 text-xs text-text-subtle">· from job</span> : null}
                         </Td>
-                      ) : null}
-                    </tr>
-                  ))}
+                        <Td className="text-text-muted capitalize">{it.kind as string}</Td>
+                        <Td className="text-right text-text-muted">{Number(it.quantity)}</Td>
+                        <Td className="text-right text-text-muted">{money(Number(it.unit_price), cur)}</Td>
+                        <Td className="text-right font-medium">{money(Number(it.amount), cur)}</Td>
+                        <Td className="text-right">
+                          {!fromJob && !["cancelled"].includes(status) ? (
+                            <RemoveItem invoiceId={id} itemId={it.id as string} />
+                          ) : null}
+                        </Td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </Table>
             </TableWrap>
-            {status === "draft" ? (
-              <CardBody className="border-t border-border">
+            {!["cancelled", "paid"].includes(status) ? (
+              <CardBody className="space-y-2 border-t border-border">
+                <p className="text-xs text-text-muted">
+                  Parts, labour and services sync automatically from the work order. Add one-off charges or
+                  discounts here.
+                </p>
                 <AddItem invoiceId={id} />
               </CardBody>
             ) : null}

@@ -30,6 +30,7 @@ export interface CheckInPayload {
   mileage_in?: string;
   fuel_level_in?: string;
   expected_completion?: string;
+  planned?: { service_id?: string; description: string; quantity: number; unit_price: number }[];
   inspection?: {
     checklist: { section: string; item: string; status: string; notes?: string }[];
     notes?: string;
@@ -71,6 +72,7 @@ export async function submitCheckIn(payload: CheckInPayload): Promise<{ error?: 
       mileage_in: payload.mileage_in ?? null,
       fuel_level_in: payload.fuel_level_in ?? null,
       expected_completion: payload.expected_completion ?? null,
+      planned: payload.planned ?? [],
     },
   });
   if (rpcError) return { error: rpcError.message };

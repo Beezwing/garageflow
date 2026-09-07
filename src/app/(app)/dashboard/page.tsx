@@ -55,6 +55,7 @@ export default async function DashboardPage() {
     { data: payMonth },
     { data: openTime },
     { data: recent },
+    { data: awaitingPayment },
   ] = await Promise.all([
     supabase
       .from("work_orders")
@@ -81,6 +82,12 @@ export default async function DashboardPage() {
       .eq("garage_id", gid)
       .order("checked_in_at", { ascending: false })
       .limit(8),
+    supabase
+      .from("work_orders")
+      .select("id, number, completed_at, customer:customers(name), vehicle:vehicles(make, model, license_plate), invoice:invoices(id, total, balance, status)")
+      .eq("garage_id", gid)
+      .in("status", ["repair_completed", "quality_check", "ready_for_payment"])
+      .order("completed_at", { ascending: true }),
   ]);
 
   const sum = (rows: { amount: number; is_refund: boolean }[] | null) =>
@@ -135,6 +142,65 @@ export default async function DashboardPage() {
         <StatCard label="Technicians working now" value={techsWorking} href="/technicians" tone="blue" />
         <StatCard label="Open jobs total" value={(openOrders ?? []).length} tone="gray" />
       </section>
+
+      {(awaitingPayment ?? []).length > 0 ? (
+        <section className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ready to invoice / take payment</CardTitle>
+              <span className="text-xs text-text-subtle">{(awaitingPayment ?? []).length} job(s)</span>
+            </CardHeader>
+            <TableWrap className="rounded-none border-0">
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Job</Th>
+                    <Th>Vehicle</Th>
+                    <Th>Customer</Th>
+                    <Th className="text-right">Total</Th>
+                    <Th className="text-right">Balance</Th>
+                    <Th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {(awaitingPayment ?? []).map((o) => {
+                    const v = o.vehicle as unknown as { make: string; model: string; license_plate: string } | null;
+                    const cu = o.customer as unknown as { name: string } | null;
+                    const inv = ((o.invoice as unknown as { id: string; total: number; balance: number; status: string }[]) ?? []).find(
+                      (i) => i.status !== "cancelled",
+                    );
+                    return (
+                      <tr key={o.id as string} className="hover:bg-surface-2">
+                        <Td>
+                          <Link href={`/workshop/jobs/${o.id}`} className="font-medium text-brand hover:underline">
+                            {o.number as string}
+                          </Link>
+                        </Td>
+                        <Td className="text-text-muted">
+                          {v ? `${v.make ?? ""} ${v.model ?? ""}`.trim() : "—"}
+                          {v?.license_plate ? <span className="text-text-subtle"> · {v.license_plate}</span> : null}
+                        </Td>
+                        <Td className="text-text-muted">{cu?.name ?? "—"}</Td>
+                        <Td className="text-right">{inv ? money(inv.total, currency) : "—"}</Td>
+                        <Td className="text-right text-[var(--tone-amber-fg)]">
+                          {inv ? money(inv.balance, currency) : "—"}
+                        </Td>
+                        <Td className="text-right">
+                          {inv ? (
+                            <Link href={`/billing/invoices/${inv.id}`} className="text-sm text-brand hover:underline">
+                              Take payment
+                            </Link>
+                          ) : null}
+                        </Td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </TableWrap>
+          </Card>
+        </section>
+      ) : null}
 
       <section className="mt-6">
         <Card>

@@ -57,7 +57,7 @@ export function AddItem({ invoiceId }: { invoiceId: string }) {
         onChange={(e) => setF({ ...f, kind: e.target.value })}
         className="rounded border border-border bg-surface px-2 py-1.5 text-sm"
       >
-        {["labor", "part", "service", "other", "discount"].map((k) => (
+        {["other", "discount"].map((k) => (
           <option key={k} value={k}>
             {k}
           </option>

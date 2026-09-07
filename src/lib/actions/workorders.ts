@@ -426,3 +426,29 @@ export async function generateInvoice(id: string) {
   revalidateWO(id);
   return data as string;
 }
+
+/* -------------------- technician notes & completion ------------------ */
+export async function addWorkNote(id: string, body: string, kind: "work" | "diagnosis" | "note" = "work") {
+  const { ctx, supabase, wo } = await loadWO(id);
+  if (!body.trim()) throw new Error("Write something first.");
+  const { error } = await supabase.from("work_order_notes").insert({
+    garage_id: wo.garage_id,
+    work_order_id: id,
+    author_id: ctx.userId,
+    kind,
+    body: body.trim(),
+  });
+  if (error) throw new Error(error.message);
+  revalidateWO(id);
+}
+
+export async function markWorkDone(id: string, note?: string) {
+  const { supabase } = await loadWO(id);
+  const { data, error } = await supabase.rpc("tech_mark_work_done", {
+    p_wo: id,
+    p_note: note ?? null,
+  });
+  if (error) throw new Error(error.message);
+  revalidateWO(id);
+  return data as string;
+}

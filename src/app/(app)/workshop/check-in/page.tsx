@@ -38,7 +38,7 @@ export default async function CheckInPage({
   const { customer, vehicle } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: customers }, { data: vehicles }, { data: template }] = await Promise.all([
+  const [{ data: customers }, { data: vehicles }, { data: template }, { data: services }] = await Promise.all([
     supabase
       .from("customers")
       .select("id, name, phone")
@@ -57,6 +57,12 @@ export default async function CheckInPage({
       .eq("kind", "inspection")
       .eq("is_default", true)
       .maybeSingle(),
+    supabase
+      .from("services")
+      .select("id, name, default_price")
+      .eq("garage_id", ctx.garage.id)
+      .eq("active", true)
+      .order("name"),
   ]);
 
   const checklistItems = ((template?.items as string[]) ?? []).length
@@ -72,6 +78,12 @@ export default async function CheckInPage({
       <CheckInWizard
         garageId={ctx.garage.id}
         garageName={ctx.garage.name}
+        currency={ctx.garage.currency}
+        services={(services ?? []).map((s) => ({
+          id: s.id as string,
+          name: s.name as string,
+          default_price: Number(s.default_price),
+        }))}
         customers={(customers ?? []) as { id: string; name: string; phone: string | null }[]}
         vehicles={((vehicles ?? []) as Record<string, unknown>[]).map((v) => ({
           id: v.id as string,

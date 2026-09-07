@@ -26,6 +26,7 @@ import { ChargesPanel } from "./ChargesPanel";
 import { AdditionalWorkPanel } from "./AdditionalWorkPanel";
 import { QualityPanel } from "./QualityPanel";
 import { InvoicePanel } from "./InvoicePanel";
+import { WorkLogPanel } from "./WorkLogPanel";
 
 export default async function WorkOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -58,6 +59,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
     { data: catalogue },
     { data: stockParts },
     { data: templates },
+    { data: workNotes },
   ] = await Promise.all([
     supabase.from("inspections").select("*, damages:inspection_damages(*)").eq("work_order_id", id).eq("kind", "checkin").maybeSingle(),
     supabase.from("technician_assignments").select("*").eq("work_order_id", id),
@@ -75,6 +77,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
     supabase.from("services").select("id, name, default_price").eq("garage_id", gid).eq("active", true).order("name"),
     supabase.from("parts").select("id, name, part_number, price, quantity").eq("garage_id", gid).is("deleted_at", null).order("name"),
     supabase.from("checklist_templates").select("id, name, kind").eq("garage_id", gid).in("kind", ["repair", "quality"]),
+    supabase.from("work_order_notes").select("*").eq("work_order_id", id).order("created_at"),
   ]);
 
   const memberIds = (members ?? []).map((m) => m.user_id as string);
@@ -85,6 +88,10 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
   const technicians = (members ?? [])
     .filter((m) => ["technician", "supervisor", "garage_admin"].includes(m.role as string))
     .map((m) => ({ id: m.user_id as string, name: nameById.get(m.user_id as string) ?? "—", role: m.role as string }));
+
+  const myAssignment = (assignments ?? []).find((a) => a.technician_id === ctx.userId);
+  const iAmAssigned = Boolean(myAssignment);
+  const iMarkedDone = Boolean(myAssignment?.completed_at);
 
   const c = wo.customer as unknown as { id: string; name: string; phone: string | null } | null;
   const v = wo.vehicle as unknown as {
@@ -231,6 +238,22 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
             currentUserId={ctx.userId}
           />
 
+          {/* Work log & completion */}
+          <WorkLogPanel
+            woId={id}
+            status={status}
+            notes={(workNotes ?? []).map((n) => ({
+              id: n.id as string,
+              kind: n.kind as string,
+              body: n.body as string,
+              created_at: n.created_at as string,
+              author: n.author_id ? nameById.get(n.author_id as string) ?? null : null,
+            }))}
+            canWrite={iAmAssigned || can(ctx.role, "task.manage")}
+            canMarkDone={iAmAssigned || can(ctx.role, "task.manage")}
+            alreadyDone={iMarkedDone}
+          />
+
           {/* Charges */}
           <ChargesPanel
             woId={id}
@@ -321,6 +344,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
               name: nameById.get(a.technician_id as string) ?? "—",
               scope: a.scope as string | null,
               time: duration(timeByTech.get(a.technician_id as string) ?? 0),
+              done: Boolean(a.completed_at),
             }))}
             technicians={technicians}
             canManage={can(ctx.role, "workorder.assign")}

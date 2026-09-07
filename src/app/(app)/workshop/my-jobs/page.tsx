@@ -5,6 +5,7 @@ import { duration, relativeTime } from "@/lib/format";
 import { WORK_ORDER_STATUS_LABELS, WORK_ORDER_STATUS_TONE, PRIORITY_TONE, PRIORITY_LABELS } from "@/lib/status";
 import { Card, CardBody, CardHeader, CardTitle, Badge, EmptyState, PageHeader } from "@/components/ui/primitives";
 import { TimeClock } from "@/components/workshop/TimeClock";
+import { MarkDoneButton } from "@/components/workshop/MarkDoneButton";
 
 export const metadata = { title: "My jobs" };
 
@@ -15,9 +16,13 @@ export default async function MyJobsPage() {
 
   const { data: assignments } = await supabase
     .from("technician_assignments")
-    .select("work_order_id, scope")
+    .select("work_order_id, scope, completed_at")
     .eq("garage_id", ctx.garage.id)
     .eq("technician_id", uid);
+
+  const doneByWO = new Map(
+    (assignments ?? []).map((a) => [a.work_order_id as string, Boolean(a.completed_at)]),
+  );
 
   const woIds = [...new Set((assignments ?? []).map((a) => a.work_order_id as string))];
 
@@ -116,13 +121,14 @@ export default async function MyJobsPage() {
             </ul>
           ) : null}
 
-          <div className="border-t border-border pt-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
             <TimeClock
               workOrderId={wid}
               runningSince={runningHere ? (openEntry as { started_at: string }).started_at : null}
               runningElsewhere={openWONumber}
               totalSeconds={timeByWO.get(wid) ?? 0}
             />
+            <MarkDoneButton workOrderId={wid} done={doneByWO.get(wid) ?? false} status={o.status as string} />
           </div>
         </CardBody>
       </Card>

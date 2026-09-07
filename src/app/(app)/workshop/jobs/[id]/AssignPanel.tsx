@@ -14,6 +14,7 @@ interface Assignment {
   name: string;
   scope: string | null;
   time: string;
+  done: boolean;
 }
 
 export function AssignPanel({
@@ -64,7 +65,10 @@ export function AssignPanel({
             {assignments.map((a) => (
               <li key={a.id} className="flex items-start justify-between gap-2 rounded-[var(--radius)] bg-surface-2 px-2.5 py-2">
                 <div>
-                  <p className="text-sm font-medium text-text">{a.name}</p>
+                  <p className="text-sm font-medium text-text">
+                    {a.name}
+                    {a.done ? <span className="ml-1 text-[var(--tone-green-fg)]">✓ done</span> : null}
+                  </p>
                   <p className="text-xs text-text-muted">
                     {a.scope || "General"} · {a.time}
                   </p>
