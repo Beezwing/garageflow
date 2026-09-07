@@ -95,12 +95,13 @@ export function DamageDiagram({
 
       <p className="mb-2 text-xs text-text-muted">Tap the vehicle to drop a marker, then set the damage type.</p>
 
-      <div className="flex justify-center rounded-[var(--radius)] border border-border bg-surface p-2">
-        {/* wrapper shrink-wraps the image so marker %s map exactly onto it */}
+      <div className="rounded-[var(--radius)] border border-border bg-surface p-2">
+        {/* wrapper is exactly the image box, so marker %s map straight onto it */}
         <div
           ref={boxRef}
           onClick={place}
-          className="relative inline-block max-h-[300px] cursor-crosshair select-none"
+          style={{ maxWidth: view === "top" ? 300 : 480 }}
+          className="relative mx-auto w-full cursor-crosshair select-none"
         >
           <VehicleImage key={view} view={view} />
 
@@ -198,7 +199,7 @@ function VehicleImage({ view }: { view: string }) {
   const [failed, setFailed] = React.useState(false);
   if (failed) {
     return (
-      <svg viewBox="0 0 100 66" className="pointer-events-none block h-[200px] w-[300px]">
+      <svg viewBox="0 0 100 66" className="pointer-events-none block w-full">
         <CarShape view={view} />
       </svg>
     );
@@ -209,7 +210,7 @@ function VehicleImage({ view }: { view: string }) {
       src={src}
       alt={`${view} view`}
       draggable={false}
-      className="pointer-events-none block max-h-[300px] w-auto"
+      className="pointer-events-none block w-full"
       onError={() => {
         if (src.endsWith(".png")) setSrc(`/vehicle/${view}.svg`);
         else setFailed(true);
