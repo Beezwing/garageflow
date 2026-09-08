@@ -72,14 +72,16 @@ export function AppTour({ role, autoStart }: { role: MembershipRole; autoStart: 
         steps,
         onPopoverRender: (popover) => {
           if (popover.footer.querySelector("[data-gf-dsa]")) return;
+          popover.footer.style.flexWrap = "wrap";
+          popover.footer.style.rowGap = "8px";
           const label = document.createElement("label");
           label.setAttribute("data-gf-dsa", "");
           label.style.cssText =
-            "display:flex;align-items:center;gap:6px;font-size:12px;color:#6b7280;margin-right:auto;cursor:pointer;user-select:none";
+            "flex-basis:100%;order:-1;display:flex;align-items:center;gap:6px;font-size:12px;color:#6b7280;cursor:pointer;user-select:none";
           const cb = document.createElement("input");
           cb.type = "checkbox";
           cb.checked = turnOff;
-          cb.style.cssText = "width:14px;height:14px;cursor:pointer";
+          cb.style.cssText = "width:14px;height:14px;cursor:pointer;margin:0";
           cb.addEventListener("change", () => {
             turnOff = cb.checked;
           });
