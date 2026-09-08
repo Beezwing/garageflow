@@ -57,7 +57,8 @@ export default async function PortalHome() {
         <Card className="border-[var(--tone-amber-fg)]">
           <CardBody>
             <p className="text-sm font-semibold text-[var(--tone-amber-fg)]">
-              {myPending.length} item{myPending.length > 1 ? "s" : ""} need your approval
+              {myPending.length} item{myPending.length > 1 ? "s" : ""}{" "}
+              {myPending.length > 1 ? "need" : "needs"} your approval
             </p>
             <ul className="mt-2 space-y-1 text-sm">
               {myPending.map((w) => {
