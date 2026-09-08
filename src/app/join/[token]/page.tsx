@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { getSessionContext, ACTIVE_GARAGE_COOKIE } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardBody } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
@@ -161,15 +160,10 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
   await activateAndGo(data as string);
 }
 
-/** Set the active-garage cookie and go to the dashboard. We set the cookie
- *  directly (not via setActiveGarage) because the membership was just created
- *  this request and the cached session context doesn't see it yet. */
-async function activateAndGo(garageId: string): Promise<never> {
-  const jar = await cookies();
-  jar.set(ACTIVE_GARAGE_COOKIE, garageId, {
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-    sameSite: "lax",
-  });
+/** Go to the dashboard. We can't set the active-garage cookie here (cookies are
+ *  read-only during a page render), but requireGarageContext falls back to the
+ *  user's first membership when no cookie is set — which is exactly the case for
+ *  someone who just accepted their first invite. */
+function activateAndGo(_garageId: string): never {
   redirect("/dashboard");
 }
