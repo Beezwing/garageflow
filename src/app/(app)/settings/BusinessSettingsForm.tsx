@@ -1,7 +1,8 @@
 "use client";
 
+import * as React from "react";
 import { useActionState, useEffect } from "react";
-import { updateGarageSettings, updateOperationalSettings } from "@/lib/actions/settings";
+import { updateGarageSettings, updateOperationalSettings, updateBookingSettings } from "@/lib/actions/settings";
 import type { ActionState } from "@/lib/actions/types";
 import type { Garage } from "@/types/domain";
 import { Button } from "@/components/ui/Button";
@@ -21,13 +22,18 @@ export function BusinessSettingsForm({
   paymentMethods,
   allowNegativeStock,
 }: {
-  garage: Garage;
+  garage: Garage & { booking_slug?: string | null; accepts_online_booking?: boolean };
   paymentMethods: string[];
   allowNegativeStock: boolean;
 }) {
   const toast = useToast();
   const [bizState, bizAction, bizPending] = useActionState(updateGarageSettings, initial);
   const [opState, opAction, opPending] = useActionState(updateOperationalSettings, initial);
+  const [bkState, bkAction, bkPending] = useActionState(updateBookingSettings, initial);
+
+  const slug = garage.booking_slug ?? garage.slug;
+  const [origin, setOrigin] = React.useState("");
+  React.useEffect(() => setOrigin(window.location.origin), []);
 
   useEffect(() => {
     if (bizState.ok) toast.push("Business details saved", "success");
@@ -37,6 +43,10 @@ export function BusinessSettingsForm({
     if (opState.ok) toast.push("Operational settings saved", "success");
     if (opState.error) toast.push(opState.error, "error");
   }, [opState, toast]);
+  useEffect(() => {
+    if (bkState.ok) toast.push("Booking settings saved", "success");
+    if (bkState.error) toast.push(bkState.error, "error");
+  }, [bkState, toast]);
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -91,6 +101,48 @@ export function BusinessSettingsForm({
             <div className="flex justify-end">
               <Button type="submit" disabled={bizPending}>
                 {bizPending ? "Saving…" : "Save business details"}
+              </Button>
+            </div>
+          </form>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Online booking</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <p className="mb-4 text-sm text-text-muted">
+            Share this link so customers can request an appointment and send photos of their vehicle. Every
+            request lands on your Appointments page for you to confirm or reschedule.
+          </p>
+          <form action={bkAction} className="space-y-4">
+            <label className="flex items-center gap-2 text-sm text-text">
+              <input
+                type="checkbox"
+                name="accepts_online_booking"
+                defaultChecked={garage.accepts_online_booking ?? true}
+                className="h-4 w-4 accent-[var(--brand)]"
+              />
+              Accept online appointment requests
+            </label>
+            <Field label="Booking link name" hint="Lowercase letters, numbers and dashes.">
+              <div className="flex items-center gap-1">
+                <span className="whitespace-nowrap text-sm text-text-subtle">{origin || "…"}/book/</span>
+                <Input name="booking_slug" defaultValue={slug} className="flex-1" />
+              </div>
+            </Field>
+            {origin ? (
+              <p className="text-xs text-text-muted">
+                Current link:{" "}
+                <a href={`${origin}/book/${slug}`} target="_blank" rel="noreferrer" className="text-brand hover:underline">
+                  {origin}/book/{slug}
+                </a>
+              </p>
+            ) : null}
+            <div className="flex justify-end">
+              <Button type="submit" disabled={bkPending}>
+                {bkPending ? "Saving…" : "Save booking settings"}
               </Button>
             </div>
           </form>

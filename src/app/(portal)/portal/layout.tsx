@@ -20,6 +20,9 @@ export default async function PortalLayout({ children }: { children: React.React
               <Link href="/portal" className="text-text-muted hover:text-text">
                 Vehicles
               </Link>
+              <Link href="/portal/appointments" className="text-text-muted hover:text-text">
+                Appointments
+              </Link>
               <Link href="/portal/invoices" className="text-text-muted hover:text-text">
                 Invoices
               </Link>

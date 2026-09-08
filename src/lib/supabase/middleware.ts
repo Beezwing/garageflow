@@ -9,6 +9,7 @@ const PUBLIC_PREFIXES = [
   "/reset-password",
   "/auth",
   "/portal/login",
+  "/book",
 ];
 
 export async function updateSession(request: NextRequest) {

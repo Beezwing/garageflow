@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/primitives";
 import { AppointmentsClient } from "./AppointmentsClient";
+import { AppointmentRequests, type ApptRequest } from "./AppointmentRequests";
 
 export const metadata = { title: "Appointments" };
 
@@ -17,11 +18,11 @@ export default async function AppointmentsPage() {
     supabase
       .from("appointments")
       .select(
-        "id, title, scheduled_at, status, notes, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, license_plate), service:services(name)",
+        "id, title, scheduled_at, preferred_at, proposed_at, status, request_state, origin, notes, customer_note, staff_note, contact_name, contact_phone, photo_urls, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate), service:services(name)",
       )
       .eq("garage_id", gid)
       .order("scheduled_at", { ascending: true })
-      .limit(200),
+      .limit(300),
     supabase.from("customers").select("id, name").eq("garage_id", gid).is("deleted_at", null).order("name"),
     supabase
       .from("vehicles")
@@ -31,14 +32,32 @@ export default async function AppointmentsPage() {
     supabase.from("services").select("id, name").eq("garage_id", gid).eq("active", true).order("name"),
   ]);
 
+  const all = (appts ?? []) as Record<string, unknown>[];
+  const rawRequests = all.filter((a) => ["pending", "proposed"].includes(a.request_state as string));
+  const scheduled = all.filter((a) => !a.request_state || a.request_state === "confirmed");
+
+  // sign the request photos (paths live in photo_urls)
+  const requests: ApptRequest[] = await Promise.all(
+    rawRequests.map(async (a) => {
+      const paths = ((a.photo_urls as string[]) ?? []).filter(Boolean);
+      let photos: string[] = [];
+      if (paths.length) {
+        const { data: signed } = await supabase.storage.from("garage-media").createSignedUrls(paths, 3600);
+        photos = (signed ?? []).map((s) => s.signedUrl).filter(Boolean) as string[];
+      }
+      return { ...(a as unknown as ApptRequest), photos };
+    }),
+  );
+
   return (
     <div>
       <PageHeader
         title="Appointments"
         description="Book work in, then turn an appointment into a check-in when the car arrives."
       />
+      {requests.length > 0 ? <AppointmentRequests requests={requests} /> : null}
       <AppointmentsClient
-        appointments={(appts ?? []) as never[]}
+        appointments={scheduled as never[]}
         customers={(customers ?? []) as { id: string; name: string }[]}
         vehicles={((vehicles ?? []) as Record<string, unknown>[]).map((v) => ({
           id: v.id as string,

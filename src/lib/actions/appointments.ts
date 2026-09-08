@@ -46,6 +46,26 @@ export async function setAppointmentStatus(id: string, status: string): Promise<
   revalidatePath("/workshop/appointments");
 }
 
+export async function respondToAppointmentRequest(
+  id: string,
+  action: "confirm" | "propose",
+  opts: { proposed_at?: string; staff_note?: string } = {},
+): Promise<void> {
+  const ctx = await requireGarageContext();
+  assertCan(ctx.role, "customer.manage");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("staff_respond_appointment_request", {
+    payload: {
+      appointment_id: id,
+      action,
+      proposed_at: opts.proposed_at ?? null,
+      staff_note: opts.staff_note ?? null,
+    },
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/workshop/appointments");
+}
+
 export async function deleteAppointment(id: string): Promise<void> {
   const ctx = await requireGarageContext();
   assertCan(ctx.role, "customer.manage");

@@ -55,6 +55,50 @@ export async function updateGarageSettings(
   return { ok: true };
 }
 
+export async function updateBookingSettings(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await requireGarageContext();
+  try {
+    assertCan(ctx.role, "settings.manage");
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+
+  const accepts_online_booking = formData.get("accepts_online_booking") === "on";
+  const rawSlug = String(formData.get("booking_slug") ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const booking_slug = rawSlug || null;
+
+  const supabase = await createClient();
+  const patch: Record<string, unknown> = { accepts_online_booking };
+  if (booking_slug) patch.booking_slug = booking_slug;
+
+  const { error } = await supabase.from("garages").update(patch).eq("id", ctx.garage.id);
+  if (error) {
+    return {
+      error: /duplicate|unique/i.test(error.message)
+        ? "That booking link is already taken — try another."
+        : error.message,
+    };
+  }
+
+  await writeAuditLog({
+    garageId: ctx.garage.id,
+    action: "garage.booking_settings_updated",
+    entityType: "garage",
+    entityId: ctx.garage.id,
+    after: patch,
+  });
+
+  revalidatePath("/settings");
+  return { ok: true };
+}
+
 export async function updateOperationalSettings(
   _prev: ActionState,
   formData: FormData,
