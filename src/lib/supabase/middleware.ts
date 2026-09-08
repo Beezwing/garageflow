@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   "/auth",
   "/portal/login",
   "/book",
+  "/join",
   "/api/cron",
 ];
 
