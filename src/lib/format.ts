@@ -11,13 +11,18 @@ export function money(amount: number | null | undefined, currency = "JMD"): stri
   }
 }
 
-export function shortDate(value: string | Date | null | undefined): string {
+// Server renders run in UTC; without an explicit timeZone every SSR'd date is
+// off by the local offset. Default to the primary market's zone (matches the
+// default garages.timezone). TODO: thread the garage's own timezone through.
+const DEFAULT_TZ = "America/Jamaica";
+
+export function shortDate(value: string | Date | null | undefined, timeZone = DEFAULT_TZ): string {
   if (!value) return "—";
   const d = typeof value === "string" ? new Date(value) : value;
-  return d.toLocaleDateString("en-JM", { day: "2-digit", month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-JM", { day: "2-digit", month: "short", year: "numeric", timeZone });
 }
 
-export function dateTime(value: string | Date | null | undefined): string {
+export function dateTime(value: string | Date | null | undefined, timeZone = DEFAULT_TZ): string {
   if (!value) return "—";
   const d = typeof value === "string" ? new Date(value) : value;
   return d.toLocaleString("en-JM", {
@@ -26,6 +31,7 @@ export function dateTime(value: string | Date | null | undefined): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone,
   });
 }
 
