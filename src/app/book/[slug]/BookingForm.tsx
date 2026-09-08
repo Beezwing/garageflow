@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { requestAppointment } from "@/lib/actions/portal";
@@ -27,7 +27,6 @@ export function BookingForm({
   defaultName: string;
   defaultEmail: string;
 }) {
-  const router = useRouter();
   const toast = useToast();
 
   // ---- auth gate ----
@@ -67,7 +66,9 @@ export function BookingForm({
         return;
       }
     }
-    router.refresh();
+    // full reload so the server component definitely picks up the new session
+    // cookie and swaps the auth gate for the booking form
+    window.location.assign(`/book/${slug}`);
   }
 
   // ---- request form ----
