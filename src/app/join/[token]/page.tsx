@@ -34,9 +34,44 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
   const ctx = await getSessionContext();
   const supabase = await createClient();
 
-  const { data: previewRows } = await supabase.rpc("invitation_preview", { p_token: token });
+  const { data: previewRows, error: previewErr } = await supabase.rpc("invitation_preview", { p_token: token });
   const preview = (previewRows as Preview[] | null)?.[0] ?? null;
   const roleLabel = preview?.role?.replace("_", " ");
+
+  // migration 0014 not applied yet → skip the nice preview, use the old flow
+  const previewUnavailable = Boolean(previewErr);
+
+  if (!preview && previewUnavailable) {
+    if (!ctx) {
+      return (
+        <Shell title="You've been invited to GarageFlow">
+          <p className="mt-2 text-sm text-text-muted">
+            Sign in or create an account with the email address the invitation was sent to, then open
+            this link again.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <ButtonLink href={`/signup?next=/join/${token}`}>Create account</ButtonLink>
+            <ButtonLink href={`/login?next=/join/${token}`} variant="secondary">
+              Sign in
+            </ButtonLink>
+          </div>
+        </Shell>
+      );
+    }
+    const { data: d, error: e } = await supabase.rpc("accept_invitation", { p_token: token });
+    if (e) {
+      return (
+        <Shell title="Invitation problem">
+          <p className="mt-2 text-sm text-[var(--tone-red-fg)]">{e.message}</p>
+          <Link href="/" className="mt-4 inline-block text-sm text-brand hover:underline">
+            Go to GarageFlow
+          </Link>
+        </Shell>
+      );
+    }
+    await setActiveGarage(d as string);
+    redirect("/dashboard");
+  }
 
   if (!preview) {
     return (
