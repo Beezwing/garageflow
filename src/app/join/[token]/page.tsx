@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { setActiveGarage } from "@/lib/actions/garage";
 import { Card, CardBody } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
+import { JoinSignup } from "./JoinSignup";
 
 export const metadata = { title: "Join a garage" };
 
@@ -116,16 +117,12 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
   if (!ctx) {
     return (
       <Shell title={`Join ${preview.garage_name}`}>
-        <p className="mt-2 text-sm text-text-muted">
-          You&apos;ve been invited as <strong>{roleLabel}</strong>. Sign in or create an account with{" "}
-          <strong>{preview.email}</strong>, then this link will finish setting you up.
-        </p>
-        <div className="mt-4 flex gap-2">
-          <ButtonLink href={`/signup?next=/join/${token}`}>Create account</ButtonLink>
-          <ButtonLink href={`/login?next=/join/${token}`} variant="secondary">
-            Sign in
-          </ButtonLink>
-        </div>
+        <JoinSignup
+          token={token}
+          email={preview.email}
+          garageName={preview.garage_name}
+          roleLabel={roleLabel ?? preview.role}
+        />
       </Shell>
     );
   }
