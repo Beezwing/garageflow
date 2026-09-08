@@ -136,6 +136,22 @@ interface TemplateCtx {
   detail?: string;
 }
 
+/**
+ * Send a one-off email through whatever email provider is configured.
+ * Returns { ok:false, provider:"mock" } when nothing is set up — callers
+ * should fall back to showing a link the user can send themselves.
+ */
+export async function sendEmail(opts: {
+  to: string;
+  subject: string;
+  body: string;
+}): Promise<{ ok: boolean; provider: string; error?: string }> {
+  const provider = providerFor("email");
+  if (provider.name === "mock") return { ok: false, provider: "mock" };
+  const res = await provider.send({ channel: "email", to: opts.to, subject: opts.subject, body: opts.body });
+  return { ok: res.ok, provider: provider.name, error: res.error };
+}
+
 export async function notifyCustomer(opts: {
   garageId: string;
   customerId: string | null;

@@ -6,9 +6,10 @@ import { requireGarageContext } from "@/lib/auth";
 import { assertCan } from "@/lib/permissions";
 import { assertWithinPlan } from "@/lib/plan-guard";
 import { writeAuditLog } from "@/lib/audit";
+import { sendEmail } from "@/lib/notifications";
 import type { MembershipRole } from "@/types/domain";
 
-type Result = { error?: string; ok?: boolean; inviteUrl?: string };
+type Result = { error?: string; ok?: boolean; inviteUrl?: string; emailed?: boolean };
 
 const ROLES: MembershipRole[] = ["garage_admin", "supervisor", "technician", "receptionist"];
 
@@ -32,6 +33,15 @@ export async function inviteStaff(_prev: Result, formData: FormData): Promise<Re
   }
 
   const supabase = await createClient();
+
+  // don't stack duplicate pending invites for the same person
+  await supabase
+    .from("invitations")
+    .delete()
+    .eq("garage_id", ctx.garage.id)
+    .eq("email", email)
+    .is("accepted_at", null);
+
   const { data, error } = await supabase
     .from("invitations")
     .insert({ garage_id: ctx.garage.id, email, role, invited_by: ctx.userId })
@@ -49,8 +59,28 @@ export async function inviteStaff(_prev: Result, formData: FormData): Promise<Re
   });
 
   const base = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const inviteUrl = `${base}/join/${data.token}`;
+
+  // email the invite if a provider is configured; otherwise the UI shows the link
+  let emailed = false;
+  try {
+    const roleLabel = role.replace("_", " ");
+    const res = await sendEmail({
+      to: email,
+      subject: `You've been invited to join ${ctx.garage.name} on GarageFlow`,
+      body:
+        `${ctx.garage.name} has invited you to join their workshop on GarageFlow as ${roleLabel}.\n\n` +
+        `Open this link and sign in (or create an account) with this email address — ${email} — to accept:\n\n` +
+        `${inviteUrl}\n\n` +
+        `The invitation expires in 14 days.`,
+    });
+    emailed = res.ok;
+  } catch {
+    emailed = false;
+  }
+
   revalidatePath("/settings/staff");
-  return { ok: true, inviteUrl: `${base}/join/${data.token}` };
+  return { ok: true, inviteUrl, emailed };
 }
 
 export async function changeStaffRole(formData: FormData): Promise<void> {
