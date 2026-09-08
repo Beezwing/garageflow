@@ -27,6 +27,8 @@ import { AdditionalWorkPanel } from "./AdditionalWorkPanel";
 import { QualityPanel } from "./QualityPanel";
 import { InvoicePanel } from "./InvoicePanel";
 import { WorkLogPanel } from "./WorkLogPanel";
+import { getSafetyTips } from "@/lib/safety";
+import { SafetyReminder } from "@/components/safety/SafetyReminder";
 
 export default async function WorkOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -95,6 +97,12 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
   const iAmAssigned = Boolean(myAssignment);
   const iMarkedDone = Boolean(myAssignment?.completed_at);
 
+  const OPEN_FOR_SAFETY = ["assigned", "in_progress", "awaiting_parts", "quality_check"];
+  const safetyTips =
+    iAmAssigned && !iMarkedDone && OPEN_FOR_SAFETY.includes(wo.status as string)
+      ? await getSafetyTips(gid)
+      : [];
+
   const c = wo.customer as unknown as { id: string; name: string; phone: string | null } | null;
   const v = wo.vehicle as unknown as {
     id: string;
@@ -125,6 +133,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="space-y-6" data-tour="workorder-page">
+      {safetyTips.length ? <SafetyReminder tips={safetyTips} dedupeKey={id} /> : null}
       {/* Header */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>

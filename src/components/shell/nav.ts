@@ -29,6 +29,7 @@ export const NAV: NavGroup[] = [
       { label: "Check-in", href: "/workshop/check-in", cap: "vehicle.checkin" },
       { label: "Active jobs", href: "/workshop/jobs" },
       { label: "Appointments", href: "/workshop/appointments", cap: "customer.manage" },
+      { label: "Safety", href: "/safety" },
     ],
   },
   {

@@ -199,7 +199,23 @@ function UserMenu({
         onClick={() => window.dispatchEvent(new Event("gf:start-tour"))}
         className="mt-2 w-full rounded-[var(--radius)] px-2 py-1.5 text-left text-xs text-text-muted hover:bg-surface-2 hover:text-text"
       >
-        Replay guided tour
+        Replay this page&apos;s tour
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          try {
+            Object.keys(localStorage)
+              .filter((k) => k.startsWith("gf-tour-"))
+              .forEach((k) => localStorage.removeItem(k));
+          } catch {
+            /* ignore */
+          }
+          window.dispatchEvent(new Event("gf:start-tour"));
+        }}
+        className="w-full rounded-[var(--radius)] px-2 py-1.5 text-left text-xs text-text-muted hover:bg-surface-2 hover:text-text"
+      >
+        Reset all tour hints
       </button>
       <form action="/auth/sign-out" method="post">
         <button
