@@ -93,15 +93,15 @@ export default async function PortalAppointments() {
                       <dt className="text-xs text-text-subtle">You asked for</dt>
                       <dd className="text-text-muted">{dateTime(a.preferred_at as string)}</dd>
                     </div>
-                    {a.proposed_at ? (
-                      <div>
-                        <dt className="text-xs text-text-subtle">Garage suggests</dt>
-                        <dd className="font-medium text-text">{dateTime(a.proposed_at as string)}</dd>
-                      </div>
-                    ) : state === "confirmed" ? (
+                    {state === "confirmed" ? (
                       <div>
                         <dt className="text-xs text-text-subtle">Confirmed for</dt>
                         <dd className="font-medium text-text">{dateTime(a.scheduled_at as string)}</dd>
+                      </div>
+                    ) : a.proposed_at ? (
+                      <div>
+                        <dt className="text-xs text-text-subtle">Garage suggests</dt>
+                        <dd className="font-medium text-text">{dateTime(a.proposed_at as string)}</dd>
                       </div>
                     ) : null}
                   </dl>
