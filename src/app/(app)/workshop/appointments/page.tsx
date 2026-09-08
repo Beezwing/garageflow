@@ -14,15 +14,26 @@ export default async function AppointmentsPage() {
   const supabase = await createClient();
   const gid = ctx.garage.id;
 
-  const [{ data: appts }, { data: customers }, { data: vehicles }, { data: services }] = await Promise.all([
+  const WITH_REQUESTS =
+    "id, title, scheduled_at, preferred_at, proposed_at, status, request_state, origin, notes, customer_note, staff_note, contact_name, contact_phone, photo_urls, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate), service:services(name)";
+  const BASE =
+    "id, title, scheduled_at, status, notes, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate), service:services(name)";
+
+  const runApptQuery = (cols: string) =>
     supabase
       .from("appointments")
-      .select(
-        "id, title, scheduled_at, preferred_at, proposed_at, status, request_state, origin, notes, customer_note, staff_note, contact_name, contact_phone, photo_urls, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate), service:services(name)",
-      )
+      .select(cols)
       .eq("garage_id", gid)
       .order("scheduled_at", { ascending: true })
-      .limit(300),
+      .limit(300);
+
+  // before migration 0011 the request_* columns don't exist yet — fall back
+  const primary = await runApptQuery(WITH_REQUESTS);
+  const appts = (primary.error ? (await runApptQuery(BASE)).data : primary.data) as
+    | Record<string, unknown>[]
+    | null;
+
+  const [{ data: customers }, { data: vehicles }, { data: services }] = await Promise.all([
     supabase.from("customers").select("id, name").eq("garage_id", gid).is("deleted_at", null).order("name"),
     supabase
       .from("vehicles")
@@ -32,7 +43,7 @@ export default async function AppointmentsPage() {
     supabase.from("services").select("id, name").eq("garage_id", gid).eq("active", true).order("name"),
   ]);
 
-  const all = (appts ?? []) as Record<string, unknown>[];
+  const all = appts ?? [];
   const rawRequests = all.filter((a) => ["pending", "proposed"].includes(a.request_state as string));
   const scheduled = all.filter((a) => !a.request_state || a.request_state === "confirmed");
 

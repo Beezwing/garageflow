@@ -26,7 +26,7 @@ export default async function PortalAppointments() {
   await requirePortalContext();
   const supabase = await createClient();
 
-  const [{ data: appts }, { data: bookGarages }] = await Promise.all([
+  const [apptsRes, bookRes] = await Promise.all([
     supabase
       .from("appointments")
       .select(
@@ -37,6 +37,8 @@ export default async function PortalAppointments() {
     supabase.rpc("my_booking_garages"),
   ]);
 
+  const appts = apptsRes.data;
+  const bookGarages = bookRes.data;
   const rows = (appts ?? []).filter((a) => a.request_state);
   const bookLinks = (bookGarages as { id: string; name: string; booking_slug: string }[] | null) ?? [];
 
