@@ -14,10 +14,12 @@ export default async function AppointmentsPage() {
   const supabase = await createClient();
   const gid = ctx.garage.id;
 
+  // NB: appointments.service_id has no FK to services, so we can't embed it —
+  // the service name is resolved from the `services` list below.
   const WITH_REQUESTS =
-    "id, title, scheduled_at, preferred_at, proposed_at, status, request_state, origin, notes, customer_note, staff_note, contact_name, contact_phone, photo_urls, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate), service:services(name)";
+    "id, title, scheduled_at, preferred_at, proposed_at, status, request_state, origin, notes, customer_note, staff_note, contact_name, contact_phone, photo_urls, service_id, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate)";
   const BASE =
-    "id, title, scheduled_at, status, notes, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate), service:services(name)";
+    "id, title, scheduled_at, status, notes, service_id, customer_id, vehicle_id, customer:customers(name), vehicle:vehicles(make, model, year, license_plate)";
 
   const runApptQuery = (cols: string) =>
     supabase
@@ -43,7 +45,11 @@ export default async function AppointmentsPage() {
     supabase.from("services").select("id, name").eq("garage_id", gid).eq("active", true).order("name"),
   ]);
 
-  const all = appts ?? [];
+  const serviceName = new Map((services ?? []).map((s) => [s.id as string, s.name as string]));
+  const all: Record<string, unknown>[] = ((appts ?? []) as Record<string, unknown>[]).map((a) => ({
+    ...a,
+    service: a.service_id ? { name: serviceName.get(a.service_id as string) ?? null } : null,
+  }));
   const rawRequests = all.filter((a) => ["pending", "proposed"].includes(a.request_state as string));
   const scheduled = all.filter((a) => !a.request_state || a.request_state === "confirmed");
 
