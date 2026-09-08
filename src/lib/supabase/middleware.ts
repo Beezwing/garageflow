@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   "/auth",
   "/portal/login",
   "/book",
+  "/api/cron",
 ];
 
 export async function updateSession(request: NextRequest) {

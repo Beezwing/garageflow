@@ -99,6 +99,18 @@ function providerFor(channel: Channel): NotificationProvider {
   return mockProvider;
 }
 
+/** Send one message on the given channel. Returns the provider used and any error. */
+export async function sendVia(
+  channel: Channel,
+  msg: { to: string; subject?: string; body: string },
+): Promise<{ ok: boolean; provider: string; error?: string }> {
+  const provider = providerFor(channel);
+  if (provider.name === "mock") return { ok: false, provider: "mock", error: "no provider configured" };
+  const res = await provider.send({ channel, to: msg.to, subject: msg.subject, body: msg.body });
+  if (!res.ok) console.error(`[sendVia:${channel}] ${provider.name} failed:`, res.error);
+  return { ok: res.ok, provider: provider.name, error: res.error };
+}
+
 const TEMPLATES: Record<CustomerEvent, (ctx: TemplateCtx) => { subject: string; body: string }> = {
   checked_in: (c) => ({
     subject: `We've received your ${c.vehicle}`,

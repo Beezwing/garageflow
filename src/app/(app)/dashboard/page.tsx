@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { requireGarageContext } from "@/lib/auth";
+import { drainMessageQueue } from "@/lib/messages/drain";
 import { createClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions";
 import { redirect } from "next/navigation";
@@ -41,6 +43,16 @@ function startOf(kind: "day" | "week" | "month") {
 export default async function DashboardPage() {
   const ctx = await requireGarageContext();
   if (!can(ctx.role, "reports.view")) redirect("/workshop/my-jobs");
+
+  // opportunistically flush any pending customer notifications (appointment
+  // confirmations etc.) after the response is sent — the hourly cron is a backstop
+  after(async () => {
+    try {
+      await drainMessageQueue(15);
+    } catch {
+      /* ignore */
+    }
+  });
 
   const supabase = await createClient();
   const gid = ctx.garage.id;
