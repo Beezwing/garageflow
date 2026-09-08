@@ -5,6 +5,7 @@ import { can } from "@/lib/permissions";
 import { money } from "@/lib/format";
 import { Card, CardBody, EmptyState } from "@/components/ui/primitives";
 import { ServicesManager } from "./ServicesManager";
+import { ServicesImport } from "./ServicesImport";
 
 export const metadata = { title: "Services & pricing" };
 
@@ -26,6 +27,7 @@ export default async function ServicesPage() {
         Preset prices speed up billing — staff can still override or enter a custom charge on any job.
         Prices in {ctx.garage.currency}.
       </p>
+      <ServicesImport hasServices={(services ?? []).length > 0} />
       {(services ?? []).length === 0 ? (
         <Card>
           <CardBody>
