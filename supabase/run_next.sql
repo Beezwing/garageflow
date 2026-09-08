@@ -833,7 +833,7 @@ create policy safety_write_global on public.safety_tips for all to authenticated
 
 -- ---- seed the global library (only if it's empty) ----------------------
 insert into public.safety_tips (garage_id, title, body, category, severity, sort_order)
-select v.title, v.body, v.category, v.severity, v.sort_order
+select null::uuid, v.title, v.body, v.category, v.severity, v.sort_order
 from (values
   ('Wear your PPE',            'Safety glasses and gloves before you start. Add a face shield for grinding, ear protection near air tools, and steel-toe boots on the floor.', 'PPE',        'warning',  10),
   ('Support the vehicle',      'Never get under a car held only by a jack. Use rated axle stands on solid, level ground and chock the wheels.', 'Lifting',    'critical', 20),
