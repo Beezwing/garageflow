@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { requestAppointment } from "@/lib/actions/portal";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, Field, Input, Textarea } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/Toast";
@@ -172,7 +173,17 @@ export function BookingForm({
           <p className="mt-1 text-xs text-text-muted">
             This lets you track the request and see {garageName}&apos;s reply.
           </p>
-          <form onSubmit={doAuth} className="mt-4 space-y-3">
+
+          <div className="mt-4">
+            <GoogleButton next={`/book/${slug}`} />
+          </div>
+          <div className="my-3 flex items-center gap-3 text-xs text-text-subtle">
+            <span className="h-px flex-1 bg-border" />
+            or use email
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <form onSubmit={doAuth} className="space-y-3">
             {authMode === "signup" ? (
               <Field label="Your name">
                 <Input value={auth.full_name} onChange={(e) => setAuth({ ...auth, full_name: e.target.value })} required />

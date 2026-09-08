@@ -14,5 +14,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  // route the failure to the login the user actually came from
+  const loginPath = next.startsWith("/portal") || next.startsWith("/book") ? "/portal/login" : "/login";
+  return NextResponse.redirect(`${origin}${loginPath}?error=auth`);
 }

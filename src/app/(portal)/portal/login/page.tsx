@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, Field, Input } from "@/components/ui/primitives";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 
 export default function PortalLoginPage() {
   const router = useRouter();
@@ -57,7 +58,17 @@ export default function PortalLoginPage() {
           <p className="mt-1 text-sm text-text-muted">
             Use the email address your garage has on file for you.
           </p>
-          <form onSubmit={submit} className="mt-5 space-y-4">
+
+          <div className="mt-5">
+            <GoogleButton next="/portal" />
+          </div>
+          <div className="my-4 flex items-center gap-3 text-xs text-text-subtle">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <form onSubmit={submit} className="space-y-4">
             {mode === "signup" ? (
               <Field label="Your name">
                 <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
