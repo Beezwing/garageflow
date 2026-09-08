@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSessionContext } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { getSessionContext, ACTIVE_GARAGE_COOKIE } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { setActiveGarage } from "@/lib/actions/garage";
 import { Card, CardBody } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { JoinSignup } from "./JoinSignup";
@@ -70,8 +70,7 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
         </Shell>
       );
     }
-    await setActiveGarage(d as string);
-    redirect("/dashboard");
+    await activateAndGo(d as string);
   }
 
   if (!preview) {
@@ -159,6 +158,18 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
     );
   }
 
-  await setActiveGarage(data as string);
+  await activateAndGo(data as string);
+}
+
+/** Set the active-garage cookie and go to the dashboard. We set the cookie
+ *  directly (not via setActiveGarage) because the membership was just created
+ *  this request and the cached session context doesn't see it yet. */
+async function activateAndGo(garageId: string): Promise<never> {
+  const jar = await cookies();
+  jar.set(ACTIVE_GARAGE_COOKIE, garageId, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  });
   redirect("/dashboard");
 }
