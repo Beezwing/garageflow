@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 import { money, shortDate, relativeTime } from "@/lib/format";
+import { cn } from "@/lib/cn";
 import {
   WORK_ORDER_STATUS_LABELS,
   WORK_ORDER_STATUS_TONE,
@@ -177,6 +178,7 @@ export default async function DashboardPage() {
                     const inv = ((o.invoice as unknown as { id: string; total: number; balance: number; status: string }[]) ?? []).find(
                       (i) => i.status !== "cancelled",
                     );
+                    const settled = inv ? Number(inv.balance) <= 0 : false;
                     return (
                       <tr key={o.id as string} className="hover:bg-surface-2">
                         <Td>
@@ -190,15 +192,19 @@ export default async function DashboardPage() {
                         </Td>
                         <Td className="text-text-muted">{cu?.name ?? "—"}</Td>
                         <Td className="text-right">{inv ? money(inv.total, currency) : "—"}</Td>
-                        <Td className="text-right text-[var(--tone-amber-fg)]">
+                        <Td className={cn("text-right", settled ? "text-[var(--tone-green-fg)]" : "text-[var(--tone-amber-fg)]")}>
                           {inv ? money(inv.balance, currency) : "—"}
                         </Td>
                         <Td className="text-right">
-                          {inv ? (
+                          {inv && !settled ? (
                             <Link href={`/billing/invoices/${inv.id}`} className="text-sm text-brand hover:underline">
                               Take payment
                             </Link>
-                          ) : null}
+                          ) : (
+                            <Link href={`/workshop/jobs/${o.id}`} className="text-sm text-brand hover:underline">
+                              Check out →
+                            </Link>
+                          )}
                         </Td>
                       </tr>
                     );

@@ -22,15 +22,19 @@ export default async function CheckoutPrint({ params }: { params: Promise<{ id: 
 
   const { data: co } = await supabase
     .from("checkouts")
-    .select("*, released:profiles(full_name)")
+    .select("*")
     .eq("work_order_id", id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
+  // profiles can't be embedded from checkouts.released_by (FK points at auth.users) — fetch it separately
+  const { data: rel } = co?.released_by
+    ? await supabase.from("profiles").select("full_name").eq("id", co.released_by as string).maybeSingle()
+    : { data: null };
+
   const c = wo.customer as unknown as { name: string; phone: string } | null;
   const v = wo.vehicle as unknown as { make: string; model: string; year: number; license_plate: string; vin: string } | null;
-  const rel = co?.released as unknown as { full_name: string } | null;
   const checklist = (co?.checklist as { item: string; checked: boolean }[]) ?? [];
 
   return (
