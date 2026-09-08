@@ -55,7 +55,9 @@ function resendProvider(): NotificationProvider | null {
             text: msg.body,
           }),
         });
-        return res.ok ? { ok: true } : { ok: false, error: `resend ${res.status}` };
+        if (res.ok) return { ok: true };
+        const detail = await res.text().catch(() => "");
+        return { ok: false, error: `resend ${res.status}: ${detail.slice(0, 300)}` };
       } catch (e) {
         return { ok: false, error: (e as Error).message };
       }
@@ -147,8 +149,12 @@ export async function sendEmail(opts: {
   body: string;
 }): Promise<{ ok: boolean; provider: string; error?: string }> {
   const provider = providerFor("email");
-  if (provider.name === "mock") return { ok: false, provider: "mock" };
+  if (provider.name === "mock") {
+    console.warn("[sendEmail] no email provider configured (RESEND_API_KEY missing) — mock mode");
+    return { ok: false, provider: "mock" };
+  }
   const res = await provider.send({ channel: "email", to: opts.to, subject: opts.subject, body: opts.body });
+  if (!res.ok) console.error(`[sendEmail] ${provider.name} failed:`, res.error);
   return { ok: res.ok, provider: provider.name, error: res.error };
 }
 
