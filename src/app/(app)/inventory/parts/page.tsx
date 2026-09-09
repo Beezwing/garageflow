@@ -89,8 +89,8 @@ export default async function PartsPage({
           description={q || filter ? "" : "Add the parts you keep on the shelf."}
         />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Part</Th>
@@ -116,17 +116,17 @@ export default async function PartsPage({
                         <span className="ml-1 font-mono text-xs text-text-subtle">{p.part_number}</span>
                       ) : null}
                     </Td>
-                    <Td className="text-text-muted">{p.category ?? "—"}</Td>
-                    <Td className="text-text-muted">{p.supplier?.name ?? "—"}</Td>
-                    <Td className="text-right">
+                    <Td label="Category" className="text-text-muted">{p.category ?? "—"}</Td>
+                    <Td label="Supplier" className="text-text-muted">{p.supplier?.name ?? "—"}</Td>
+                    <Td label="On hand" className="text-right">
                       <span className={isLow ? "font-semibold text-[var(--tone-amber-fg)]" : ""}>{Number(p.quantity)}</span>
                       {isLow ? <Badge tone="amber" className="ml-1">low</Badge> : null}
                     </Td>
-                    <Td className="text-right text-text-muted">{money(Number(p.cost), cur)}</Td>
-                    <Td className="text-right">{money(Number(p.price), cur)}</Td>
-                    <Td className="text-text-muted">{p.location ?? "—"}</Td>
+                    <Td label="Cost" className="text-right text-text-muted">{money(Number(p.cost), cur)}</Td>
+                    <Td label="Price" className="text-right">{money(Number(p.price), cur)}</Td>
+                    <Td label="Location" className="text-text-muted">{p.location ?? "—"}</Td>
                     {manage ? (
-                      <Td className="whitespace-nowrap text-right">
+                      <Td label="" className="whitespace-nowrap text-right max-sm:justify-end">
                         <PartRowActions part={p} suppliers={(suppliers ?? []) as { id: string; name: string }[]} currency={cur} />
                       </Td>
                     ) : null}

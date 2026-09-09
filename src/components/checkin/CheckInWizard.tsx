@@ -175,23 +175,42 @@ export function CheckInWizard({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <ol className="mb-5 flex flex-wrap gap-1 text-xs" data-tour="checkin-steps">
-        {STEPS.map((s, i) => (
-          <li
-            key={s}
-            className={cn(
-              "rounded-full px-2.5 py-1 font-medium",
-              i === step
-                ? "bg-brand text-brand-fg"
-                : i < step
-                  ? "bg-brand-soft text-brand"
-                  : "bg-surface-2 text-text-subtle",
-            )}
-          >
-            {i + 1}. {s}
-          </li>
-        ))}
-      </ol>
+      {/* compact progress on mobile, full step chips on larger screens */}
+      <div className="mb-5" data-tour="checkin-steps">
+        <div className="sm:hidden">
+          <div className="flex items-baseline justify-between">
+            <p className="text-sm font-semibold text-text">
+              {step + 1}. {STEPS[step]}
+            </p>
+            <p className="text-xs text-text-subtle">
+              Step {step + 1} of {STEPS.length}
+            </p>
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="h-full rounded-full bg-brand transition-all"
+              style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+        <ol className="hidden flex-wrap gap-1 text-xs sm:flex">
+          {STEPS.map((s, i) => (
+            <li
+              key={s}
+              className={cn(
+                "rounded-full px-2.5 py-1 font-medium",
+                i === step
+                  ? "bg-brand text-brand-fg"
+                  : i < step
+                    ? "bg-brand-soft text-brand"
+                    : "bg-surface-2 text-text-subtle",
+              )}
+            >
+              {i + 1}. {s}
+            </li>
+          ))}
+        </ol>
+      </div>
 
       <Card data-tour="checkin-body">
         <CardBody>
@@ -526,16 +545,21 @@ export function CheckInWizard({
         </CardBody>
       </Card>
 
-      <div className="mt-4 flex items-center justify-between">
-        <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0 || pending}>
+      <div className="pb-safe sticky bottom-16 z-30 mt-4 flex items-center gap-3 border-t border-border bg-bg/95 py-3 backdrop-blur max-sm:-mx-4 max-sm:px-4 sm:static sm:border-0 sm:bg-transparent sm:py-0 lg:bottom-0">
+        <Button
+          variant="secondary"
+          onClick={() => setStep((s) => Math.max(0, s - 1))}
+          disabled={step === 0 || pending}
+          className="max-sm:flex-1"
+        >
           Back
         </Button>
         {step < STEPS.length - 1 ? (
-          <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext()}>
+          <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext()} className="max-sm:flex-[2]">
             Continue
           </Button>
         ) : (
-          <Button onClick={submit} disabled={pending} data-tour="checkin-submit">
+          <Button onClick={submit} disabled={pending} data-tour="checkin-submit" className="max-sm:flex-[2]">
             {pending ? "Checking in…" : "Check in vehicle"}
           </Button>
         )}

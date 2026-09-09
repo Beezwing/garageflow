@@ -42,19 +42,21 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          "relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl",
+          "relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl",
           size === "sm" && "sm:max-w-sm",
           size === "md" && "sm:max-w-lg",
           size === "lg" && "sm:max-w-2xl",
         )}
       >
-        <div className="border-b border-border px-5 py-4">
+        <div className="shrink-0 border-b border-border px-5 py-4">
           <h2 className="text-base font-semibold text-text">{title}</h2>
           {description ? <p className="mt-0.5 text-sm text-text-muted">{description}</p> : null}
         </div>
-        {children ? <div className="px-5 py-4">{children}</div> : null}
+        {children ? <div className="gf-scroll flex-1 overflow-y-auto px-5 py-4">{children}</div> : null}
         {footer ? (
-          <div className="flex justify-end gap-2 border-t border-border px-5 py-3">{footer}</div>
+          <div className="pb-safe flex shrink-0 flex-col-reverse gap-2 border-t border-border px-5 py-3 sm:flex-row sm:justify-end [&_button]:max-sm:w-full">
+            {footer}
+          </div>
         ) : null}
       </div>
     </div>

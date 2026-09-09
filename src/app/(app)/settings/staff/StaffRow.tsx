@@ -39,7 +39,7 @@ export function StaffRow({
           {isSelf ? <span className="text-xs text-text-subtle">(you)</span> : null}
         </div>
       </Td>
-      <Td>
+      <Td label="Role">
         <select
           defaultValue={role}
           disabled={pending}
@@ -67,8 +67,8 @@ export function StaffRow({
           ))}
         </select>
       </Td>
-      <Td className="text-text-muted">{joined}</Td>
-      <Td className="text-right">
+      <Td label="Joined" className="text-text-muted">{joined}</Td>
+      <Td label="" className="text-right max-sm:justify-end">
         {isSelf ? (
           <span className="text-xs text-text-subtle">—</span>
         ) : (

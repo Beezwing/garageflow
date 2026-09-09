@@ -56,8 +56,8 @@ export default async function InvoicesPage({
       {(invoices ?? []).length === 0 ? (
         <EmptyState title="No invoices yet" description="Generate one from a work order's Invoice panel." />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Invoice</Th>
@@ -80,14 +80,14 @@ export default async function InvoicesPage({
                         {i.number as string}
                       </Link>
                     </Td>
-                    <Td className="text-text-muted">{w?.number ?? "—"}</Td>
-                    <Td className="text-text-muted">{c?.name ?? "—"}</Td>
-                    <Td className="text-text-muted">{i.issued_at ? shortDate(i.issued_at as string) : "—"}</Td>
-                    <Td>{money(Number(i.total), ctx.garage.currency)}</Td>
-                    <Td className={Number(i.balance) > 0 ? "text-[var(--tone-amber-fg)]" : "text-text-muted"}>
+                    <Td label="Job" className="text-text-muted">{w?.number ?? "—"}</Td>
+                    <Td label="Customer" className="text-text-muted">{c?.name ?? "—"}</Td>
+                    <Td label="Issued" className="text-text-muted">{i.issued_at ? shortDate(i.issued_at as string) : "—"}</Td>
+                    <Td label="Total">{money(Number(i.total), ctx.garage.currency)}</Td>
+                    <Td label="Balance" className={Number(i.balance) > 0 ? "text-[var(--tone-amber-fg)]" : "text-text-muted"}>
                       {money(Number(i.balance), ctx.garage.currency)}
                     </Td>
-                    <Td>
+                    <Td label="Status">
                       <Badge tone={TONE[i.status as string] ?? "gray"}>{i.status as string}</Badge>
                     </Td>
                   </tr>

@@ -58,8 +58,8 @@ export default async function VehiclesPage({
           description={q ? "Try a plate or VIN." : "Add one, or it'll be created during check-in."}
         />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Vehicle</Th>
@@ -79,9 +79,9 @@ export default async function VehiclesPage({
                         {`${v.year ?? ""} ${v.make ?? ""} ${v.model ?? ""}`.trim() || "Vehicle"}
                       </Link>
                     </Td>
-                    <Td className="text-text-muted">{(v.license_plate as string) ?? "—"}</Td>
-                    <Td className="font-mono text-xs text-text-muted">{(v.vin as string) ?? "—"}</Td>
-                    <Td>
+                    <Td label="Plate" className="text-text-muted">{(v.license_plate as string) ?? "—"}</Td>
+                    <Td label="VIN" className="font-mono text-xs text-text-muted">{(v.vin as string) ?? "—"}</Td>
+                    <Td label="Owner">
                       {c ? (
                         <Link href={`/customers/${c.id}`} className="text-brand hover:underline">
                           {c.name}
@@ -90,7 +90,7 @@ export default async function VehiclesPage({
                         "—"
                       )}
                     </Td>
-                    <Td className="text-text-muted">
+                    <Td label="Mileage" className="text-text-muted">
                       {v.mileage ? `${Number(v.mileage).toLocaleString()} km` : "—"}
                     </Td>
                   </tr>

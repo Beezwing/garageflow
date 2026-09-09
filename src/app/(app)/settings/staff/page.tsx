@@ -56,8 +56,8 @@ export default async function StaffPage() {
         <CardHeader>
           <CardTitle>Team ({members?.length ?? 0})</CardTitle>
         </CardHeader>
-        <TableWrap className="rounded-none border-0">
-          <Table>
+        <TableWrap cards className="rounded-none border-0">
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Name</Th>
@@ -104,8 +104,8 @@ export default async function StaffPage() {
             <EmptyState title="No pending invitations" />
           </CardBody>
         ) : (
-          <TableWrap className="rounded-none border-0">
-            <Table>
+          <TableWrap cards className="rounded-none border-0">
+            <Table className="gf-table-cards">
               <thead>
                 <tr>
                   <Th>Email</Th>
@@ -118,11 +118,11 @@ export default async function StaffPage() {
                 {(invites ?? []).map((i) => (
                   <tr key={i.id as string}>
                     <Td>{i.email as string}</Td>
-                    <Td>
+                    <Td label="Role">
                       <Badge tone="blue">{ROLE_LABELS[i.role as keyof typeof ROLE_LABELS]}</Badge>
                     </Td>
-                    <Td className="text-text-muted">{shortDate(i.expires_at as string)}</Td>
-                    <Td className="text-right">
+                    <Td label="Expires" className="text-text-muted">{shortDate(i.expires_at as string)}</Td>
+                    <Td label="" className="text-right max-sm:justify-end">
                       <form action={revokeInvitation}>
                         <input type="hidden" name="invitation_id" value={i.id as string} />
                         <button className="text-sm text-[var(--tone-red-fg)] hover:underline">

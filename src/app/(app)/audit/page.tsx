@@ -56,8 +56,8 @@ export default async function AuditPage({
         <EmptyState title="No audit entries yet" description="Activity will appear here as your team uses GarageFlow." />
       ) : (
         <>
-          <TableWrap>
-            <Table>
+          <TableWrap cards>
+            <Table className="gf-table-cards">
               <thead>
                 <tr>
                   <Th>When</Th>
@@ -71,14 +71,14 @@ export default async function AuditPage({
                 {rows.map((r) => (
                   <tr key={r.id as string} className="hover:bg-surface-2">
                     <Td className="whitespace-nowrap text-text-muted">{dateTime(r.created_at as string)}</Td>
-                    <Td>{actorName.get(r.user_id as string) || "—"}</Td>
-                    <Td>
+                    <Td label="Actor">{actorName.get(r.user_id as string) || "—"}</Td>
+                    <Td label="Action">
                       <Badge tone="blue">{r.action as string}</Badge>
                     </Td>
-                    <Td className="text-text-muted">
+                    <Td label="Entity" className="text-text-muted">
                       {r.entity_type ? `${r.entity_type}` : "—"}
                     </Td>
-                    <Td className="text-text-muted">{(r.reason as string) || "—"}</Td>
+                    <Td label="Reason" className="text-text-muted">{(r.reason as string) || "—"}</Td>
                   </tr>
                 ))}
               </tbody>

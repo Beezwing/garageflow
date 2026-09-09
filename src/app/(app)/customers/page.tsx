@@ -65,8 +65,8 @@ export default async function CustomersPage({
           description={q ? "Try a different search." : "Add a customer, or they'll be created during check-in."}
         />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Name</Th>

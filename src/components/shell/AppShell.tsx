@@ -43,6 +43,19 @@ export function AppShell({
 
   React.useEffect(() => setMobileOpen(false), [pathname]);
 
+  const homeHref = can(role, "reports.view") ? "/dashboard" : "/workshop/my-jobs";
+  const bottomNav: { href: string; label: string; icon: React.ReactNode; show: boolean }[] = [
+    { href: homeHref, label: "Home", icon: <IconHome />, show: true },
+    { href: "/workshop/jobs", label: "Jobs", icon: <IconWrench />, show: true },
+    {
+      href: "/workshop/check-in",
+      label: "Check in",
+      icon: <IconPlus />,
+      show: can(role, "vehicle.checkin"),
+    },
+    { href: "/notifications", label: "Alerts", icon: <IconBell />, show: true },
+  ].filter((i) => i.show);
+
   const groups = NAV.map((g) => ({
     ...g,
     items: g.items.filter((i) => !i.cap || can(role, i.cap as Capability)),
@@ -66,7 +79,7 @@ export function AppShell({
                     href={item.href}
                     data-tour={item.href}
                     className={cn(
-                      "flex items-center justify-between rounded-[var(--radius)] px-2 py-1.5 text-sm transition-colors",
+                      "flex items-center justify-between rounded-[var(--radius)] px-2 py-2 text-sm transition-colors max-lg:py-2.5",
                       active
                         ? "bg-brand-soft font-medium text-brand"
                         : "text-text-muted hover:bg-surface-2 hover:text-text",
@@ -110,12 +123,12 @@ export function AppShell({
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <aside className="relative flex h-full w-72 flex-col border-r border-border bg-surface">
+          <aside className="pt-safe pb-safe relative flex h-full w-[82vw] max-w-xs flex-col border-r border-border bg-surface">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <span className="font-semibold text-text">GarageFlow</span>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="text-text-muted"
+                className="grid h-9 w-9 place-items-center rounded-[var(--radius)] text-text-muted hover:bg-surface-2"
                 aria-label="Close menu"
               >
                 ✕
@@ -138,29 +151,110 @@ export function AppShell({
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-surface/90 px-4 py-2.5 backdrop-blur lg:hidden">
+        <header className="pt-safe sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-surface/90 px-3 py-2.5 backdrop-blur lg:hidden">
           <button
             onClick={() => setMobileOpen(true)}
-            className="rounded-[var(--radius)] border border-border px-2.5 py-1.5 text-sm"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius)] border border-border text-lg"
             aria-label="Open menu"
           >
             ☰
           </button>
-          <span className="truncate text-sm font-medium text-text">{garage.name}</span>
-          <Link href="/notifications" className="relative ml-auto p-1 text-text-muted" aria-label="Notifications">
-            🔔
-            {unreadCount > 0 ? (
-              <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[0.6rem] font-semibold text-brand-fg">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            ) : null}
-          </Link>
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
+            {garage.name.charAt(0)}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text">{garage.name}</span>
+          <div className="shrink-0">
+            <GlobalSearch iconOnly />
+          </div>
         </header>
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">{children}</main>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 pb-24 sm:px-6 lg:pb-6">{children}</main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-surface/95 backdrop-blur lg:hidden">
+        {bottomNav.map((item) => {
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[0.65rem] font-medium",
+                active ? "text-brand" : "text-text-muted",
+              )}
+            >
+              <span className="grid h-6 w-6 place-items-center">{item.icon}</span>
+              {item.label}
+              {item.href === "/notifications" && unreadCount > 0 ? (
+                <span className="absolute right-[22%] top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[0.6rem] font-semibold text-brand-fg">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              ) : null}
+            </Link>
+          );
+        })}
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="flex flex-1 flex-col items-center gap-0.5 py-2 text-[0.65rem] font-medium text-text-muted"
+          aria-label="More"
+        >
+          <span className="grid h-6 w-6 place-items-center"><IconMenu /></span>
+          More
+        </button>
+      </nav>
 
       <AppTour role={role} autoStart={Boolean(tourPending)} />
     </div>
+  );
+}
+
+/* ---- bottom-nav icons (stroke, inherit color) ---- */
+const iconProps = {
+  width: 22,
+  height: 22,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.9,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+function IconHome() {
+  return (
+    <svg {...iconProps}>
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V21h14V9.5" />
+    </svg>
+  );
+}
+function IconWrench() {
+  return (
+    <svg {...iconProps}>
+      <path d="M14.5 6a3.5 3.5 0 0 0-4.9 4.4L3 17v4h4l6.6-6.6A3.5 3.5 0 0 0 18 9.5l-2.5 2.5-2-2L16 7.5A3.5 3.5 0 0 0 14.5 6Z" />
+    </svg>
+  );
+}
+function IconPlus() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v8M8 12h8" />
+    </svg>
+  );
+}
+function IconBell() {
+  return (
+    <svg {...iconProps}>
+      <path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5 2 6H4c.5-1 2-2 2-6Z" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
+    </svg>
+  );
+}
+function IconMenu() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
   );
 }
 

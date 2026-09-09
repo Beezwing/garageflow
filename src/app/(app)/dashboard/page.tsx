@@ -171,8 +171,8 @@ export default async function DashboardPage() {
               <CardTitle>Ready to invoice / take payment</CardTitle>
               <span className="text-xs text-text-subtle">{(awaitingPayment ?? []).length} job(s)</span>
             </CardHeader>
-            <TableWrap className="rounded-none border-0">
-              <Table>
+            <TableWrap cards className="rounded-none border-0">
+              <Table className="gf-table-cards">
                 <thead>
                   <tr>
                     <Th>Job</Th>
@@ -198,16 +198,16 @@ export default async function DashboardPage() {
                             {o.number as string}
                           </Link>
                         </Td>
-                        <Td className="text-text-muted">
+                        <Td label="Vehicle" className="text-text-muted">
                           {v ? `${v.make ?? ""} ${v.model ?? ""}`.trim() : "—"}
                           {v?.license_plate ? <span className="text-text-subtle"> · {v.license_plate}</span> : null}
                         </Td>
-                        <Td className="text-text-muted">{cu?.name ?? "—"}</Td>
-                        <Td className="text-right">{inv ? money(inv.total, currency) : "—"}</Td>
-                        <Td className={cn("text-right", settled ? "text-[var(--tone-green-fg)]" : "text-[var(--tone-amber-fg)]")}>
+                        <Td label="Customer" className="text-text-muted">{cu?.name ?? "—"}</Td>
+                        <Td label="Total" className="text-right">{inv ? money(inv.total, currency) : "—"}</Td>
+                        <Td label="Balance" className={cn("text-right", settled ? "text-[var(--tone-green-fg)]" : "text-[var(--tone-amber-fg)]")}>
                           {inv ? money(inv.balance, currency) : "—"}
                         </Td>
-                        <Td className="text-right">
+                        <Td label="" className="text-right max-sm:justify-end">
                           {inv && !settled ? (
                             <Link href={`/billing/invoices/${inv.id}`} className="text-sm text-brand hover:underline">
                               Take payment
@@ -249,8 +249,8 @@ export default async function DashboardPage() {
               />
             </CardBody>
           ) : (
-            <TableWrap className="rounded-none border-0">
-              <Table>
+            <TableWrap cards className="rounded-none border-0">
+              <Table className="gf-table-cards">
                 <thead>
                   <tr>
                     <Th>Job</Th>
@@ -272,24 +272,24 @@ export default async function DashboardPage() {
                             {o.number}
                           </Link>
                         </Td>
-                        <Td>
+                        <Td label="Vehicle">
                           {v ? `${v.make ?? ""} ${v.model ?? ""}`.trim() : "—"}
                           {v?.license_plate ? (
                             <span className="ml-1 text-text-subtle">· {v.license_plate}</span>
                           ) : null}
                         </Td>
-                        <Td>{c?.name ?? "—"}</Td>
-                        <Td>
+                        <Td label="Customer">{c?.name ?? "—"}</Td>
+                        <Td label="Status">
                           <Badge tone={WORK_ORDER_STATUS_TONE[o.status as keyof typeof WORK_ORDER_STATUS_TONE]}>
                             {WORK_ORDER_STATUS_LABELS[o.status as keyof typeof WORK_ORDER_STATUS_LABELS]}
                           </Badge>
                         </Td>
-                        <Td>
+                        <Td label="Priority">
                           <Badge tone={PRIORITY_TONE[o.priority as keyof typeof PRIORITY_TONE]}>
                             {PRIORITY_LABELS[o.priority as keyof typeof PRIORITY_LABELS]}
                           </Badge>
                         </Td>
-                        <Td className="text-text-muted">{relativeTime(o.checked_in_at)}</Td>
+                        <Td label="Checked in" className="text-text-muted">{relativeTime(o.checked_in_at)}</Td>
                       </tr>
                     );
                   })}

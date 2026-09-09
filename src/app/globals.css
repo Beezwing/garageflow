@@ -102,3 +102,98 @@ body {
 .gf-scroll {
   scrollbar-width: thin;
 }
+
+/* ------------------------------------------------------------------ *
+ * Mobile
+ * ------------------------------------------------------------------ */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  overflow-x: hidden;
+}
+
+/* iOS zooms in when a focused field is < 16px — force 16px on small screens */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* comfortable hit targets on touch devices */
+@media (pointer: coarse) {
+  a,
+  button,
+  [role="button"],
+  select,
+  summary {
+    touch-action: manipulation;
+  }
+}
+
+/* Safe-area helpers (iPhone notch / home indicator) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive tables — <Table className="gf-table-cards">
+ * Below 640px each row becomes a stacked card; each <Td label="…">
+ * shows its label. Add label to every Td for this to read well.
+ * ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .gf-table-cards,
+  .gf-table-cards thead,
+  .gf-table-cards tbody,
+  .gf-table-cards tr,
+  .gf-table-cards td {
+    display: block;
+    width: 100%;
+  }
+  .gf-table-cards thead {
+    position: absolute;
+    left: -9999px;
+  }
+  .gf-table-cards tr {
+    border-bottom: 8px solid var(--bg);
+    padding: 0.5rem 0.25rem;
+  }
+  .gf-table-cards td {
+    border: 0 !important;
+    padding: 0.35rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    text-align: right;
+  }
+  .gf-table-cards td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-subtle);
+    text-align: left;
+    flex: 0 0 auto;
+  }
+  .gf-table-cards td:empty,
+  .gf-table-cards td[data-label=""]:empty {
+    display: none;
+  }
+  /* the row's first cell reads as the card heading */
+  .gf-table-cards td:first-child {
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding-top: 0.5rem;
+  }
+  .gf-table-cards td:first-child::before {
+    display: none;
+  }
+}

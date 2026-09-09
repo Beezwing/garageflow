@@ -69,8 +69,8 @@ export default async function JobsPage({
       {(orders ?? []).length === 0 ? (
         <EmptyState title="No jobs match" description="Adjust the filters, or check a vehicle in." />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Job</Th>
@@ -93,23 +93,23 @@ export default async function JobsPage({
                         {o.number as string}
                       </Link>
                     </Td>
-                    <Td className="text-text-muted">
+                    <Td label="Vehicle" className="text-text-muted">
                       {v ? `${v.make ?? ""} ${v.model ?? ""}`.trim() : "—"}
                       {v?.license_plate ? <span className="text-text-subtle"> · {v.license_plate}</span> : null}
                     </Td>
-                    <Td className="text-text-muted">{c?.name ?? "—"}</Td>
-                    <Td className="max-w-xs truncate text-text-muted">{(o.complaint as string) ?? "—"}</Td>
-                    <Td>
+                    <Td label="Customer" className="text-text-muted">{c?.name ?? "—"}</Td>
+                    <Td label="Complaint" className="max-w-xs truncate text-text-muted">{(o.complaint as string) ?? "—"}</Td>
+                    <Td label="Status">
                       <Badge tone={WORK_ORDER_STATUS_TONE[o.status as keyof typeof WORK_ORDER_STATUS_TONE]}>
                         {WORK_ORDER_STATUS_LABELS[o.status as keyof typeof WORK_ORDER_STATUS_LABELS]}
                       </Badge>
                     </Td>
-                    <Td>
+                    <Td label="Priority">
                       <Badge tone={PRIORITY_TONE[o.priority as keyof typeof PRIORITY_TONE]}>
                         {PRIORITY_LABELS[o.priority as keyof typeof PRIORITY_LABELS]}
                       </Badge>
                     </Td>
-                    <Td className="text-text-muted">{relativeTime(o.checked_in_at as string)}</Td>
+                    <Td label="Age" className="text-text-muted">{relativeTime(o.checked_in_at as string)}</Td>
                   </tr>
                 );
               })}

@@ -11,7 +11,7 @@ interface Hit {
   href: string;
 }
 
-export function GlobalSearch() {
+export function GlobalSearch({ iconOnly = false }: { iconOnly?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [q, setQ] = React.useState("");
@@ -90,17 +90,27 @@ export function GlobalSearch() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 rounded-[var(--radius)] border border-border bg-surface px-2.5 py-1.5 text-sm text-text-subtle hover:text-text"
-      >
-        <span>🔍</span>
-        <span className="flex-1 text-left">Search…</span>
-        <kbd className="rounded border border-border px-1 text-[0.65rem]">⌘K</kbd>
-      </button>
+      {iconOnly ? (
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Search"
+          className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-border text-text-muted"
+        >
+          🔍
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex w-full items-center gap-2 rounded-[var(--radius)] border border-border bg-surface px-2.5 py-2 text-sm text-text-subtle hover:text-text"
+        >
+          <span>🔍</span>
+          <span className="flex-1 text-left">Search…</span>
+          <kbd className="rounded border border-border px-1 text-[0.65rem]">⌘K</kbd>
+        </button>
+      )}
 
       {open ? (
-        <div className="fixed inset-0 z-[95] flex items-start justify-center bg-black/40 p-4 pt-[12vh]">
+        <div className="fixed inset-0 z-[95] flex items-start justify-center bg-black/40 p-3 pt-[8vh] sm:p-4 sm:pt-[12vh]">
           <div className="absolute inset-0" onClick={() => setOpen(false)} />
           <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
             <input
@@ -128,7 +138,7 @@ export function GlobalSearch() {
                     key={h.href}
                     onClick={() => go(h)}
                     onMouseEnter={() => setI(n)}
-                    className={`flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-sm ${
+                    className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm sm:py-2 ${
                       n === i ? "bg-surface-2" : ""
                     }`}
                   >

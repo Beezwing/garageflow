@@ -52,8 +52,8 @@ export default async function SuppliersPage() {
       {(suppliers ?? []).length === 0 ? (
         <EmptyState title="No suppliers yet" description="Add a supplier so you can log stock received." />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Supplier</Th>
@@ -68,11 +68,11 @@ export default async function SuppliersPage() {
               {((suppliers ?? []) as Supplier[]).map((s) => (
                 <tr key={s.id} className="hover:bg-surface-2">
                   <Td className="font-medium text-text">{s.name}</Td>
-                  <Td className="text-text-muted">{s.contact_person ?? "—"}</Td>
-                  <Td className="text-text-muted">{s.phone ?? "—"}</Td>
-                  <Td className="text-right">{partCount.get(s.id) ?? 0}</Td>
-                  <Td className="text-right text-text-muted">{money(spent.get(s.id) ?? 0, cur)}</Td>
-                  <Td className="whitespace-nowrap text-right">
+                  <Td label="Contact" className="text-text-muted">{s.contact_person ?? "—"}</Td>
+                  <Td label="Phone" className="text-text-muted">{s.phone ?? "—"}</Td>
+                  <Td label="Parts" className="text-right">{partCount.get(s.id) ?? 0}</Td>
+                  <Td label="Spent" className="text-right text-text-muted">{money(spent.get(s.id) ?? 0, cur)}</Td>
+                  <Td label="" className="whitespace-nowrap text-right max-sm:justify-end">
                     <SupplierActions supplier={s} />
                   </Td>
                 </tr>

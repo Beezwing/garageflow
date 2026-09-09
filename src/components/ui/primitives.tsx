@@ -138,11 +138,17 @@ export function EmptyState({
 }
 
 /* -------------------------------- Table ---------------------------------- */
-export function TableWrap({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function TableWrap({
+  className,
+  cards,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { cards?: boolean }) {
   return (
     <div
       className={cn(
         "gf-scroll overflow-x-auto rounded-[var(--radius)] border border-border bg-surface",
+        // in card mode the rows are their own cards on mobile — drop the wrapper chrome
+        cards && "max-sm:overflow-visible max-sm:rounded-none max-sm:border-0 max-sm:bg-transparent",
         className,
       )}
       {...props}
@@ -163,8 +169,18 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
     />
   );
 }
-export function Td({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("border-b border-border px-3 py-2.5 align-middle text-text", className)} {...props} />;
+export function Td({
+  className,
+  label,
+  ...props
+}: React.TdHTMLAttributes<HTMLTableCellElement> & { label?: string }) {
+  return (
+    <td
+      data-label={label}
+      className={cn("border-b border-border px-3 py-2.5 align-middle text-text", className)}
+      {...props}
+    />
+  );
 }
 
 /* ------------------------------- Divider -------------------------------- */

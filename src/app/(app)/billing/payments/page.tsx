@@ -46,8 +46,8 @@ export default async function PaymentsPage() {
       {(payments ?? []).length === 0 ? (
         <EmptyState title="No payments yet" description="Record payments from an invoice." />
       ) : (
-        <TableWrap>
-          <Table>
+        <TableWrap cards>
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>When</Th>
@@ -65,7 +65,7 @@ export default async function PaymentsPage() {
                 return (
                   <tr key={p.id as string} className="hover:bg-surface-2">
                     <Td className="text-text-muted">{dateTime(p.created_at as string)}</Td>
-                    <Td>
+                    <Td label="Invoice">
                       {inv ? (
                         <Link href={`/billing/invoices/${inv.id}`} className="text-brand hover:underline">
                           {inv.number}
@@ -74,11 +74,11 @@ export default async function PaymentsPage() {
                         "—"
                       )}
                     </Td>
-                    <Td className="text-text-muted">{inv?.customer?.name ?? "—"}</Td>
-                    <Td className="capitalize">{(p.method as string).replace("_", " ")}</Td>
-                    <Td className="text-text-muted">{(p.reference as string) ?? "—"}</Td>
-                    <Td className="text-text-muted">{p.is_refund ? "Refund" : ""}</Td>
-                    <Td className={`text-right font-medium ${p.is_refund ? "text-[var(--tone-red-fg)]" : ""}`}>
+                    <Td label="Customer" className="text-text-muted">{inv?.customer?.name ?? "—"}</Td>
+                    <Td label="Method" className="capitalize">{(p.method as string).replace("_", " ")}</Td>
+                    <Td label="Reference" className="text-text-muted">{(p.reference as string) ?? "—"}</Td>
+                    <Td label="Type" className="text-text-muted">{p.is_refund ? "Refund" : ""}</Td>
+                    <Td label="Amount" className={`text-right font-medium ${p.is_refund ? "text-[var(--tone-red-fg)]" : ""}`}>
                       {p.is_refund ? "-" : ""}
                       {money(Number(p.amount), cur)}
                     </Td>

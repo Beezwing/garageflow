@@ -40,10 +40,10 @@ export function CustomerRow({
           {name}
         </Link>
       </Td>
-      <Td className="text-text-muted">{phone ?? "—"}</Td>
-      <Td className="text-text-muted">{email ?? "—"}</Td>
-      <Td>{vehicleCount}</Td>
-      <Td>{openJobs > 0 ? <Badge tone="violet">{openJobs} open</Badge> : <span className="text-text-subtle">—</span>}</Td>
+      <Td label="Phone" className="text-text-muted">{phone ?? "—"}</Td>
+      <Td label="Email" className="text-text-muted">{email ?? "—"}</Td>
+      <Td label="Vehicles">{vehicleCount}</Td>
+      <Td label="Jobs">{openJobs > 0 ? <Badge tone="violet">{openJobs} open</Badge> : <span className="text-text-subtle">—</span>}</Td>
     </tr>
   );
 }
