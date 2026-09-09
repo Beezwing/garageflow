@@ -196,4 +196,10 @@ body {
   .gf-table-cards td:first-child::before {
     display: none;
   }
+
+  /* stacked modal footer buttons go full-width */
+  .gf-modal-footer > button,
+  .gf-modal-footer > * > button {
+    width: 100%;
+  }
 }

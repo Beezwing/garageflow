@@ -54,7 +54,7 @@ export function Modal({
         </div>
         {children ? <div className="gf-scroll flex-1 overflow-y-auto px-5 py-4">{children}</div> : null}
         {footer ? (
-          <div className="pb-safe flex shrink-0 flex-col-reverse gap-2 border-t border-border px-5 py-3 sm:flex-row sm:justify-end [&_button]:max-sm:w-full">
+          <div className="gf-modal-footer pb-safe flex shrink-0 flex-col-reverse gap-2 border-t border-border px-5 py-3 sm:flex-row sm:justify-end">
             {footer}
           </div>
         ) : null}
