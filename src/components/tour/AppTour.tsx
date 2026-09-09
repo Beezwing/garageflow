@@ -30,6 +30,18 @@ const write = (key: string, on: boolean) => {
 const seen = (k: string) => read(seenKey(k));
 const dismissed = (k: string) => read(offKey(k));
 
+/* The guided tours are built around the persistent desktop sidebar. On a phone
+ * that nav lives in a slide-out drawer, so most steps have nothing to point at
+ * and the popover collides with the bottom tab bar. Auto-start on desktop only;
+ * the drawer's "Replay this page's tour" still works at any size. */
+const canAutoStart = () => {
+  try {
+    return window.matchMedia("(min-width: 1024px)").matches;
+  } catch {
+    return true;
+  }
+};
+
 /* ------------------------------------------------------------------ */
 
 export function AppTour({ role, autoStart }: { role: MembershipRole; autoStart: boolean }) {
@@ -111,6 +123,7 @@ export function AppTour({ role, autoStart }: { role: MembershipRole; autoStart: 
   /* app overview — once per user, on the landing page */
   React.useEffect(() => {
     if (!autoStart || appHandled.current) return;
+    if (!canAutoStart()) return;
     if (!APP_OVERVIEW.match(pathname, role)) return;
     if (seen("app") || dismissed("app")) {
       appHandled.current = true;
@@ -125,6 +138,7 @@ export function AppTour({ role, autoStart }: { role: MembershipRole; autoStart: 
   React.useEffect(() => {
     const def = tourForPath(pathname, role);
     if (!def) return;
+    if (!canAutoStart()) return;
     if (seen(def.key) || dismissed(def.key)) return;
     // don't collide with the app overview on the landing page
     if (APP_OVERVIEW.match(pathname, role) && !seen("app") && !dismissed("app")) return;

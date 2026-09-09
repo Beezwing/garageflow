@@ -202,4 +202,14 @@ body {
   .gf-modal-footer > * > button {
     width: 100%;
   }
+
+  /* driver.js tour popovers: fit the screen and clear the bottom tab bar
+   * when a tour is replayed manually on a phone */
+  .driver-popover {
+    max-width: calc(100vw - 1.5rem) !important;
+  }
+  .driver-popover-navigation-btns {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
 }

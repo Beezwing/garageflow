@@ -51,11 +51,11 @@ export function AddItem({ invoiceId }: { invoiceId: string }) {
   const { run, pending } = useRun();
   const [f, setF] = React.useState({ kind: "other", description: "", quantity: "1", unit_price: "" });
   return (
-    <div className="flex flex-wrap items-end gap-2">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
       <select
         value={f.kind}
         onChange={(e) => setF({ ...f, kind: e.target.value })}
-        className="rounded border border-border bg-surface px-2 py-1.5 text-sm"
+        className="w-full rounded border border-border bg-surface px-2 py-1.5 text-sm sm:w-auto"
       >
         {["other", "discount"].map((k) => (
           <option key={k} value={k}>
@@ -67,24 +67,27 @@ export function AddItem({ invoiceId }: { invoiceId: string }) {
         placeholder="Description"
         value={f.description}
         onChange={(e) => setF({ ...f, description: e.target.value })}
-        className="min-w-[8rem] flex-1 rounded border border-border bg-surface px-2 py-1.5 text-sm"
+        className="w-full rounded border border-border bg-surface px-2 py-1.5 text-sm sm:min-w-[8rem] sm:flex-1"
       />
-      <input
-        type="number"
-        placeholder="Qty"
-        value={f.quantity}
-        onChange={(e) => setF({ ...f, quantity: e.target.value })}
-        className="w-16 rounded border border-border bg-surface px-2 py-1.5 text-sm"
-      />
-      <input
-        type="number"
-        placeholder="Unit"
-        value={f.unit_price}
-        onChange={(e) => setF({ ...f, unit_price: e.target.value })}
-        className="w-24 rounded border border-border bg-surface px-2 py-1.5 text-sm"
-      />
+      <div className="flex gap-2">
+        <input
+          type="number"
+          placeholder="Qty"
+          value={f.quantity}
+          onChange={(e) => setF({ ...f, quantity: e.target.value })}
+          className="w-16 rounded border border-border bg-surface px-2 py-1.5 text-sm"
+        />
+        <input
+          type="number"
+          placeholder="Unit"
+          value={f.unit_price}
+          onChange={(e) => setF({ ...f, unit_price: e.target.value })}
+          className="w-24 rounded border border-border bg-surface px-2 py-1.5 text-sm"
+        />
+      </div>
       <Button
         size="sm"
+        className="max-sm:w-full"
         disabled={pending || !f.description.trim()}
         onClick={() =>
           run(
@@ -117,33 +120,36 @@ export function RecordPayment({
   const { run, pending } = useRun();
   const [f, setF] = React.useState({ amount: String(balance > 0 ? balance : ""), method: methods[0], reference: "" });
   return (
-    <div className="flex flex-wrap items-end gap-2">
-      <input
-        type="number"
-        placeholder="Amount"
-        value={f.amount}
-        onChange={(e) => setF({ ...f, amount: e.target.value })}
-        className="w-28 rounded border border-border bg-surface px-2 py-1.5 text-sm"
-      />
-      <select
-        value={f.method}
-        onChange={(e) => setF({ ...f, method: e.target.value })}
-        className="rounded border border-border bg-surface px-2 py-1.5 text-sm"
-      >
-        {methods.map((m) => (
-          <option key={m} value={m}>
-            {m.replace("_", " ")}
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+      <div className="flex gap-2">
+        <input
+          type="number"
+          placeholder="Amount"
+          value={f.amount}
+          onChange={(e) => setF({ ...f, amount: e.target.value })}
+          className="w-28 flex-1 rounded border border-border bg-surface px-2 py-1.5 text-sm sm:flex-none"
+        />
+        <select
+          value={f.method}
+          onChange={(e) => setF({ ...f, method: e.target.value })}
+          className="rounded border border-border bg-surface px-2 py-1.5 text-sm"
+        >
+          {methods.map((m) => (
+            <option key={m} value={m}>
+              {m.replace("_", " ")}
+            </option>
+          ))}
+        </select>
+      </div>
       <input
         placeholder="Reference"
         value={f.reference}
         onChange={(e) => setF({ ...f, reference: e.target.value })}
-        className="w-32 rounded border border-border bg-surface px-2 py-1.5 text-sm"
+        className="w-full rounded border border-border bg-surface px-2 py-1.5 text-sm sm:w-32"
       />
       <Button
         size="sm"
+        className="max-sm:w-full"
         disabled={pending || !(Number(f.amount) > 0)}
         onClick={() =>
           run(

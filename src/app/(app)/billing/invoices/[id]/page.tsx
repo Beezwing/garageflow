@@ -88,8 +88,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <CardHeader>
               <CardTitle>Line items</CardTitle>
             </CardHeader>
-            <TableWrap className="rounded-none border-0">
-              <Table>
+            <TableWrap cards className="rounded-none border-0">
+              <Table className="gf-table-cards">
                 <thead>
                   <tr>
                     <Th>Description</Th>
@@ -107,15 +107,15 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                     );
                     return (
                       <tr key={it.id as string}>
-                        <Td>
+                        <Td label="Description">
                           {it.description as string}
                           {fromJob ? <span className="ml-1 text-xs text-text-subtle">· from job</span> : null}
                         </Td>
-                        <Td className="text-text-muted capitalize">{it.kind as string}</Td>
-                        <Td className="text-right text-text-muted">{Number(it.quantity)}</Td>
-                        <Td className="text-right text-text-muted">{money(Number(it.unit_price), cur)}</Td>
-                        <Td className="text-right font-medium">{money(Number(it.amount), cur)}</Td>
-                        <Td className="text-right">
+                        <Td label="Kind" className="text-text-muted capitalize">{it.kind as string}</Td>
+                        <Td label="Qty" className="text-right text-text-muted">{Number(it.quantity)}</Td>
+                        <Td label="Unit" className="text-right text-text-muted">{money(Number(it.unit_price), cur)}</Td>
+                        <Td label="Amount" className="text-right font-medium">{money(Number(it.amount), cur)}</Td>
+                        <Td label="" className="text-right max-sm:justify-end">
                           {!fromJob && !["cancelled"].includes(status) ? (
                             <RemoveItem invoiceId={id} itemId={it.id as string} />
                           ) : null}
@@ -144,8 +144,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             {(payments ?? []).length === 0 ? (
               <CardBody className="text-sm text-text-muted">No payments recorded.</CardBody>
             ) : (
-              <TableWrap className="rounded-none border-0">
-                <Table>
+              <TableWrap cards className="rounded-none border-0">
+                <Table className="gf-table-cards">
                   <thead>
                     <tr>
                       <Th>When</Th>
@@ -157,10 +157,10 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   <tbody>
                     {(payments ?? []).map((p) => (
                       <tr key={p.id as string}>
-                        <Td className="text-text-muted">{dateTime(p.created_at as string)}</Td>
-                        <Td className="capitalize">{(p.method as string).replace("_", " ")}</Td>
-                        <Td className="text-text-muted">{(p.reference as string) ?? "—"}</Td>
-                        <Td className={`text-right font-medium ${p.is_refund ? "text-[var(--tone-red-fg)]" : ""}`}>
+                        <Td label="When" className="text-text-muted">{dateTime(p.created_at as string)}</Td>
+                        <Td label="Method" className="capitalize">{(p.method as string).replace("_", " ")}</Td>
+                        <Td label="Reference" className="text-text-muted">{(p.reference as string) ?? "—"}</Td>
+                        <Td label="Amount" className={`text-right font-medium ${p.is_refund ? "text-[var(--tone-red-fg)]" : ""}`}>
                           {p.is_refund ? "-" : ""}
                           {money(Number(p.amount), cur)}
                         </Td>
