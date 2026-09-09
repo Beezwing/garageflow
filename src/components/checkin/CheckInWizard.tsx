@@ -545,7 +545,7 @@ export function CheckInWizard({
         </CardBody>
       </Card>
 
-      <div className="pb-safe sticky bottom-16 z-30 mt-4 flex items-center gap-3 border-t border-border bg-bg/95 py-3 backdrop-blur max-sm:-mx-4 max-sm:px-4 sm:static sm:border-0 sm:bg-transparent sm:py-0 lg:bottom-0">
+      <div className="pb-safe sticky bottom-16 z-30 mt-4 flex items-center gap-3 border-t border-border bg-bg/95 py-3 backdrop-blur max-sm:-mx-4 max-sm:px-4 sm:static sm:justify-between sm:border-0 sm:bg-transparent sm:py-0 lg:bottom-0">
         <Button
           variant="secondary"
           onClick={() => setStep((s) => Math.max(0, s - 1))}
