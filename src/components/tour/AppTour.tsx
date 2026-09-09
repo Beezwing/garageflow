@@ -36,7 +36,12 @@ const dismissed = (k: string) => read(offKey(k));
  * the drawer's "Replay this page's tour" still works at any size. */
 const canAutoStart = () => {
   try {
-    return window.matchMedia("(min-width: 1024px)").matches;
+    const w =
+      window.innerWidth ||
+      document.documentElement.clientWidth ||
+      0;
+    // width 0 == headless / not yet measured — don't suppress on a bad read
+    return w === 0 || w >= 1024;
   } catch {
     return true;
   }
