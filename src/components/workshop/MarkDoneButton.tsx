@@ -28,7 +28,7 @@ export function MarkDoneButton({
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button size="sm" className="max-sm:w-full" onClick={() => setOpen(true)}>
         Mark work done
       </Button>
       <ConfirmDialog

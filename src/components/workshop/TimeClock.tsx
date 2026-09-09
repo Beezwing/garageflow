@@ -46,7 +46,7 @@ export function TimeClock({
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start">
       <div className="tabular-nums">
         <span className="text-lg font-semibold text-text">{duration(live)}</span>
         <span className="ml-1 text-xs text-text-subtle">your time</span>

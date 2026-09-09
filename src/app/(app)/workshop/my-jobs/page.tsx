@@ -121,7 +121,7 @@ export default async function MyJobsPage() {
             </ul>
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+          <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <TimeClock
               workOrderId={wid}
               runningSince={runningHere ? (openEntry as { started_at: string }).started_at : null}
