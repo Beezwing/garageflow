@@ -48,8 +48,10 @@ export function DamageDiagram({
   function place(e: React.MouseEvent<HTMLDivElement>) {
     if ((e.target as HTMLElement).closest("[data-marker]")) return;
     const rect = boxRef.current!.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return; // not laid out yet — avoid NaN coords
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     const marker: DamageMarker = {
       id: crypto.randomUUID(),
       view,

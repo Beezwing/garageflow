@@ -98,8 +98,9 @@ export async function submitCheckIn(payload: CheckInPayload): Promise<{ error?: 
       .single();
 
     if (insp && payload.inspection.damages.length) {
-      await supabase.from("inspection_damages").insert(
-        payload.inspection.damages.map((d) => ({
+      const damages = payload.inspection.damages
+        .filter((d) => Number.isFinite(d.x) && Number.isFinite(d.y))
+        .map((d) => ({
           garage_id: ctx.garage.id,
           inspection_id: insp.id,
           view: d.view,
@@ -108,8 +109,11 @@ export async function submitCheckIn(payload: CheckInPayload): Promise<{ error?: 
           damage_type: d.damage_type,
           description: d.description ?? null,
           notes: d.notes ?? null,
-        })),
-      );
+        }));
+      if (damages.length) {
+        const { error: dmgErr } = await supabase.from("inspection_damages").insert(damages);
+        if (dmgErr) throw new Error(`Could not save damage markers: ${dmgErr.message}`);
+      }
     }
     await supabase.from("work_orders").update({ status: "inspected" }).eq("id", woId);
   }
