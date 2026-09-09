@@ -47,8 +47,8 @@ export default async function PortalInvoiceDetail({ params }: { params: Promise<
         <CardHeader>
           <CardTitle>Items</CardTitle>
         </CardHeader>
-        <TableWrap className="rounded-none border-0">
-          <Table>
+        <TableWrap cards className="rounded-none border-0">
+          <Table className="gf-table-cards">
             <thead>
               <tr>
                 <Th>Description</Th>
@@ -59,9 +59,9 @@ export default async function PortalInvoiceDetail({ params }: { params: Promise<
             <tbody>
               {(items ?? []).map((it) => (
                 <tr key={it.id as string}>
-                  <Td>{it.description as string}</Td>
-                  <Td className="text-right text-text-muted">{Number(it.quantity)}</Td>
-                  <Td className="text-right">{money(Number(it.amount), cur)}</Td>
+                  <Td label="Description">{it.description as string}</Td>
+                  <Td label="Qty" className="text-right text-text-muted">{Number(it.quantity)}</Td>
+                  <Td label="Amount" className="text-right">{money(Number(it.amount), cur)}</Td>
                 </tr>
               ))}
             </tbody>

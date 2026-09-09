@@ -109,8 +109,8 @@ export default async function PartDetailPage({ params }: { params: Promise<{ id:
             <EmptyState title="No movements yet" />
           </CardBody>
         ) : (
-          <TableWrap className="rounded-none border-0">
-            <Table>
+          <TableWrap cards className="rounded-none border-0">
+            <Table className="gf-table-cards">
               <thead>
                 <tr>
                   <Th>When</Th>
@@ -126,16 +126,16 @@ export default async function PartDetailPage({ params }: { params: Promise<{ id:
                   const delta = Number(t.quantity_delta);
                   return (
                     <tr key={t.id as string} className="hover:bg-surface-2">
-                      <Td className="whitespace-nowrap text-text-muted">{dateTime(t.created_at as string)}</Td>
-                      <Td>
+                      <Td label="When" className="whitespace-nowrap text-text-muted">{dateTime(t.created_at as string)}</Td>
+                      <Td label="Type">
                         <Badge tone={delta >= 0 ? "green" : "amber"}>{TXN_LABEL[t.type as string] ?? t.type}</Badge>
                       </Td>
-                      <Td className={`text-right font-medium ${delta >= 0 ? "text-[var(--tone-green-fg)]" : "text-[var(--tone-amber-fg)]"}`}>
+                      <Td label="Change" className={`text-right font-medium ${delta >= 0 ? "text-[var(--tone-green-fg)]" : "text-[var(--tone-amber-fg)]"}`}>
                         {delta >= 0 ? "+" : ""}
                         {delta}
                       </Td>
-                      <Td className="text-right text-text-muted">{Number(t.quantity_after)}</Td>
-                      <Td className="text-text-muted">
+                      <Td label="After" className="text-right text-text-muted">{Number(t.quantity_after)}</Td>
+                      <Td label="Reference" className="text-text-muted">
                         {w ? (
                           <Link href={`/workshop/jobs/${w.id}`} className="text-brand hover:underline">
                             {w.number}

@@ -135,8 +135,8 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
             <EmptyState title="No service history" description="This will fill in as the vehicle is worked on." />
           </CardBody>
         ) : (
-          <TableWrap className="rounded-none border-0">
-            <Table>
+          <TableWrap cards className="rounded-none border-0">
+            <Table className="gf-table-cards">
               <thead>
                 <tr>
                   <Th>Job</Th>
@@ -149,21 +149,21 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
               <tbody>
                 {(orders ?? []).map((o) => (
                   <tr key={o.id as string} className="hover:bg-surface-2">
-                    <Td>
+                    <Td label="Job">
                       <Link href={`/workshop/jobs/${o.id}`} className="font-medium text-brand hover:underline">
                         {o.number as string}
                       </Link>
                     </Td>
-                    <Td className="max-w-xs truncate text-text-muted">{(o.complaint as string) ?? "—"}</Td>
-                    <Td className="text-text-muted">
+                    <Td label="Work" className="text-text-muted max-sm:max-w-none sm:max-w-xs sm:truncate">{(o.complaint as string) ?? "—"}</Td>
+                    <Td label="Mileage in" className="text-text-muted">
                       {o.mileage_in ? `${Number(o.mileage_in).toLocaleString()} km` : "—"}
                     </Td>
-                    <Td>
+                    <Td label="Status">
                       <Badge tone={WORK_ORDER_STATUS_TONE[o.status as keyof typeof WORK_ORDER_STATUS_TONE]}>
                         {WORK_ORDER_STATUS_LABELS[o.status as keyof typeof WORK_ORDER_STATUS_LABELS]}
                       </Badge>
                     </Td>
-                    <Td className="text-text-muted">{shortDate(o.checked_in_at as string)}</Td>
+                    <Td label="Checked in" className="text-text-muted">{shortDate(o.checked_in_at as string)}</Td>
                   </tr>
                 ))}
               </tbody>

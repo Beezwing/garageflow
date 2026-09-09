@@ -132,8 +132,8 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             <EmptyState title="No vehicles on file" />
           </CardBody>
         ) : (
-          <TableWrap className="rounded-none border-0">
-            <Table>
+          <TableWrap cards className="rounded-none border-0">
+            <Table className="gf-table-cards">
               <thead>
                 <tr>
                   <Th>Vehicle</Th>
@@ -145,14 +145,14 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               <tbody>
                 {(vehicles ?? []).map((v) => (
                   <tr key={v.id as string} className="hover:bg-surface-2">
-                    <Td>
+                    <Td label="Vehicle">
                       <Link href={`/vehicles/${v.id}`} className="font-medium text-brand hover:underline">
                         {`${v.make ?? ""} ${v.model ?? ""}`.trim() || "Vehicle"}
                       </Link>
                     </Td>
-                    <Td className="text-text-muted">{(v.license_plate as string) ?? "—"}</Td>
-                    <Td className="text-text-muted">{(v.year as number) ?? "—"}</Td>
-                    <Td className="text-text-muted">
+                    <Td label="Plate" className="text-text-muted">{(v.license_plate as string) ?? "—"}</Td>
+                    <Td label="Year" className="text-text-muted">{(v.year as number) ?? "—"}</Td>
+                    <Td label="Mileage" className="text-text-muted">
                       {v.mileage ? `${Number(v.mileage).toLocaleString()} km` : "—"}
                     </Td>
                   </tr>
@@ -172,8 +172,8 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             <EmptyState title="No work orders yet" />
           </CardBody>
         ) : (
-          <TableWrap className="rounded-none border-0">
-            <Table>
+          <TableWrap cards className="rounded-none border-0">
+            <Table className="gf-table-cards">
               <thead>
                 <tr>
                   <Th>Job</Th>
@@ -188,21 +188,21 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   const v = o.vehicle as unknown as { make: string; model: string; license_plate: string } | null;
                   return (
                     <tr key={o.id as string} className="hover:bg-surface-2">
-                      <Td>
+                      <Td label="Job">
                         <Link href={`/workshop/jobs/${o.id}`} className="font-medium text-brand hover:underline">
                           {o.number as string}
                         </Link>
                       </Td>
-                      <Td className="text-text-muted">
+                      <Td label="Vehicle" className="text-text-muted">
                         {v ? `${v.make ?? ""} ${v.model ?? ""}`.trim() : "—"}
                       </Td>
-                      <Td className="max-w-xs truncate text-text-muted">{(o.complaint as string) ?? "—"}</Td>
-                      <Td>
+                      <Td label="Complaint" className="text-text-muted max-sm:max-w-none sm:max-w-xs sm:truncate">{(o.complaint as string) ?? "—"}</Td>
+                      <Td label="Status">
                         <Badge tone={WORK_ORDER_STATUS_TONE[o.status as keyof typeof WORK_ORDER_STATUS_TONE]}>
                           {WORK_ORDER_STATUS_LABELS[o.status as keyof typeof WORK_ORDER_STATUS_LABELS]}
                         </Badge>
                       </Td>
-                      <Td className="text-text-muted">{shortDate(o.checked_in_at as string)}</Td>
+                      <Td label="Date" className="text-text-muted">{shortDate(o.checked_in_at as string)}</Td>
                     </tr>
                   );
                 })}
