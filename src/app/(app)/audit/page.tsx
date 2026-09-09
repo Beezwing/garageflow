@@ -39,6 +39,13 @@ export default async function AuditPage({
   const rows = data ?? [];
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / pageSize));
 
+  // profiles can't be embedded from audit_logs.user_id (FK → auth.users) — fetch + join
+  const actorIds = [...new Set(rows.map((r) => r.user_id as string | null).filter(Boolean))] as string[];
+  const { data: actors } = actorIds.length
+    ? await supabase.from("profiles").select("id, full_name").in("id", actorIds)
+    : { data: [] as { id: string; full_name: string | null }[] };
+  const actorName = new Map((actors ?? []).map((a) => [a.id as string, a.full_name as string | null]));
+
   return (
     <div>
       <PageHeader
@@ -64,7 +71,7 @@ export default async function AuditPage({
                 {rows.map((r) => (
                   <tr key={r.id as string} className="hover:bg-surface-2">
                     <Td className="whitespace-nowrap text-text-muted">{dateTime(r.created_at as string)}</Td>
-                    <Td>{(r.actor_name as string) || "—"}</Td>
+                    <Td>{actorName.get(r.user_id as string) || "—"}</Td>
                     <Td>
                       <Badge tone="blue">{r.action as string}</Badge>
                     </Td>
