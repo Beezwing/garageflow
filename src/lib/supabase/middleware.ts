@@ -12,6 +12,8 @@ const PUBLIC_PREFIXES = [
   "/book",
   "/join",
   "/api/cron",
+  "/manifest.json",
+  "/sw.js",
 ];
 
 export async function updateSession(request: NextRequest) {
