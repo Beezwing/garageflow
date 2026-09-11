@@ -2,6 +2,7 @@ import { requireGarageContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { relativeTime } from "@/lib/format";
 import { PageHeader, EmptyState, Card } from "@/components/ui/primitives";
+import { PushToggle } from "@/components/push/PushToggle";
 import { MarkAllRead } from "./MarkAllRead";
 
 export const metadata = { title: "Notifications" };
@@ -27,6 +28,9 @@ export default async function NotificationsPage() {
         description={unread ? `${unread} unread` : "You're all caught up"}
         actions={unread ? <MarkAllRead /> : null}
       />
+      <div className="mb-4">
+        <PushToggle />
+      </div>
       {rows.length === 0 ? (
         <EmptyState title="Nothing here yet" description="Job assignments, approvals and stock alerts will show up here." />
       ) : (

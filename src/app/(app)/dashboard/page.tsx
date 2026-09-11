@@ -2,6 +2,7 @@ import Link from "next/link";
 import { after } from "next/server";
 import { requireGarageContext } from "@/lib/auth";
 import { drainMessageQueue } from "@/lib/messages/drain";
+import { drainStaffPush } from "@/lib/push";
 import { createClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions";
 import { redirect } from "next/navigation";
@@ -48,7 +49,7 @@ export default async function DashboardPage() {
   // confirmations etc.) after the response is sent — the hourly cron is a backstop
   after(async () => {
     try {
-      await drainMessageQueue(15);
+      await Promise.all([drainMessageQueue(15), drainStaffPush(15)]);
     } catch {
       /* ignore */
     }

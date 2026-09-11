@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { relativeTime, shortDate } from "@/lib/format";
 import { WORK_ORDER_STATUS_LABELS, WORK_ORDER_STATUS_TONE } from "@/lib/status";
 import { Card, CardBody, Badge, EmptyState } from "@/components/ui/primitives";
+import { PushToggle } from "@/components/push/PushToggle";
 
 export const metadata = { title: "Your vehicles" };
 
@@ -52,6 +53,8 @@ export default async function PortalHome() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold text-text">Hi {ctx.fullName.split(" ")[0]} 👋</h1>
+
+      <PushToggle />
 
       {myPending.length > 0 ? (
         <Card className="border-[var(--tone-amber-fg)]">

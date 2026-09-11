@@ -2,6 +2,12 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendVia, type Channel } from "@/lib/notifications";
 import { dateTime } from "@/lib/format";
+import { sendPushToUser } from "@/lib/push";
+
+function pushUrlFor(template: string): string {
+  if (template.startsWith("appointment")) return "/portal/appointments";
+  return "/portal";
+}
 
 const MAX_ATTEMPTS = 5;
 
@@ -72,8 +78,10 @@ export async function drainMessageQueue(limit = 25): Promise<DrainResult> {
 
   const [{ data: customers }, { data: garages }] = await Promise.all([
     customerIds.length
-      ? supabase.from("customers").select("id, name, email, phone").in("id", customerIds)
-      : Promise.resolve({ data: [] as { id: string; name: string; email: string | null; phone: string | null }[] }),
+      ? supabase.from("customers").select("id, name, email, phone, portal_user_id").in("id", customerIds)
+      : Promise.resolve({
+          data: [] as { id: string; name: string; email: string | null; phone: string | null; portal_user_id: string | null }[],
+        }),
     supabase.from("garages").select("id, name").in("id", garageIds),
   ]);
 
@@ -123,6 +131,16 @@ export async function drainMessageQueue(limit = 25): Promise<DrainResult> {
           last_attempt_at: new Date().toISOString(),
         })
         .eq("id", row.id);
+
+      // best-effort: also push to the customer's portal account, if linked
+      if (cust?.portal_user_id) {
+        void sendPushToUser(cust.portal_user_id, {
+          title: rendered.subject,
+          body: rendered.body,
+          url: pushUrlFor(row.template),
+          tag: `msg-${row.id}`,
+        });
+      }
     } else if (res.provider === "mock") {
       // nothing configured for this channel — leave it queued, don't burn attempts
       skipped++;

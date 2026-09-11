@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { drainMessageQueue } from "@/lib/messages/drain";
+import { drainStaffPush } from "@/lib/push";
 
 // Vercel Cron hits this on a schedule (see vercel.json). It can also be pinged
 // by an external scheduler (Supabase pg_cron / cron-job.org) with ?key=SECRET.
@@ -20,8 +21,8 @@ async function handle(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   try {
-    const result = await drainMessageQueue(50);
-    return NextResponse.json({ ok: true, ...result });
+    const [messages, staffPush] = await Promise.all([drainMessageQueue(50), drainStaffPush(50)]);
+    return NextResponse.json({ ok: true, messages, staffPush });
   } catch (e) {
     console.error("[cron/send-messages]", e);
     return NextResponse.json({ ok: false, error: (e as Error).message }, { status: 500 });
