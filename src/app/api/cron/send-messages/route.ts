@@ -20,13 +20,18 @@ async function handle(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  try {
-    const [messages, staffPush] = await Promise.all([drainMessageQueue(50), drainStaffPush(50)]);
-    return NextResponse.json({ ok: true, messages, staffPush });
-  } catch (e) {
-    console.error("[cron/send-messages]", e);
-    return NextResponse.json({ ok: false, error: (e as Error).message }, { status: 500 });
-  }
+  // Independent jobs — one failing (e.g. the push migration hasn't run yet)
+  // must never mask or block the other from reporting/succeeding.
+  const [messages, staffPush] = await Promise.allSettled([drainMessageQueue(50), drainStaffPush(50)]);
+
+  if (messages.status === "rejected") console.error("[cron/send-messages] messages", messages.reason);
+  if (staffPush.status === "rejected") console.error("[cron/send-messages] staffPush", staffPush.reason);
+
+  return NextResponse.json({
+    ok: messages.status === "fulfilled" && staffPush.status === "fulfilled",
+    messages: messages.status === "fulfilled" ? messages.value : { error: String(messages.reason) },
+    staffPush: staffPush.status === "fulfilled" ? staffPush.value : { error: String(staffPush.reason) },
+  });
 }
 
 export const GET = handle;
