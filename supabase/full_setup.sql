@@ -333,7 +333,10 @@ begin
     raise exception 'not authenticated';
   end if;
 
-  select id into v_plan_id from public.subscription_plans where code = 'free' limit 1;
+  -- Pilot phase: default new self-signups to Enterprise (full access, no
+  -- limits) so signing the pilot agreements + creating an account is enough
+  -- to be fully unlocked. Revert to 'free' before opening signup publicly.
+  select id into v_plan_id from public.subscription_plans where code = 'enterprise' limit 1;
 
   insert into public.garages (name, slug, phone, email, address, currency, plan_id)
   values (p_name, lower(p_slug), p_phone, p_email, p_address, coalesce(p_currency,'JMD'), v_plan_id)
