@@ -12,10 +12,10 @@
   --text-muted: #667085;
   --text-subtle: #98a2b3;
 
-  --brand: #1554d1;
-  --brand-hover: #0f47b6;
+  --brand: #f2751a;
+  --brand-hover: #d35f0f;
   --brand-fg: #ffffff;
-  --brand-soft: #e8eefc;
+  --brand-soft: #fdecd9;
 
   --tone-gray-bg: #f2f4f7;   --tone-gray-fg: #475467;
   --tone-blue-bg: #e8eefc;   --tone-blue-fg: #1554d1;
@@ -37,10 +37,10 @@
     --text-muted: #98a2b3;
     --text-subtle: #6b7280;
 
-    --brand: #4c86f5;
-    --brand-hover: #6699f7;
-    --brand-fg: #0b0d12;
-    --brand-soft: #17233d;
+    --brand: #ff9142;
+    --brand-hover: #ffa866;
+    --brand-fg: #1a0f05;
+    --brand-soft: #3a2312;
 
     --tone-gray-bg: #1e222c;   --tone-gray-fg: #cbd2de;
     --tone-blue-bg: #17233d;   --tone-blue-fg: #8fb4fb;
@@ -59,10 +59,10 @@
   --text: #f0f2f5;
   --text-muted: #98a2b3;
   --text-subtle: #6b7280;
-  --brand: #4c86f5;
-  --brand-hover: #6699f7;
-  --brand-fg: #0b0d12;
-  --brand-soft: #17233d;
+  --brand: #ff9142;
+  --brand-hover: #ffa866;
+  --brand-fg: #1a0f05;
+  --brand-soft: #3a2312;
   --tone-gray-bg: #1e222c;   --tone-gray-fg: #cbd2de;
   --tone-blue-bg: #17233d;   --tone-blue-fg: #8fb4fb;
   --tone-amber-bg: #3a2a10;  --tone-amber-fg: #f5b979;

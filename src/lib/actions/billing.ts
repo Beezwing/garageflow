@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireGarageContext } from "@/lib/auth";
 import { assertCan } from "@/lib/permissions";
 import { writeAuditLog } from "@/lib/audit";
+import { sendServiceReport } from "@/lib/service-report";
 
 function rev(invoiceId: string, woId?: string) {
   revalidatePath("/billing/invoices");
@@ -114,6 +115,7 @@ export async function checkOutVehicle(payload: {
   id_verified: boolean;
   final_mileage?: number;
   notes?: string;
+  customer_notes?: string;
   checklist: { item: string; checked: boolean }[];
   customer_signature?: string;
   override_reason?: string;
@@ -144,6 +146,7 @@ export async function checkOutVehicle(payload: {
       id_verified: payload.id_verified,
       final_mileage: payload.final_mileage ?? null,
       notes: payload.notes ?? null,
+      customer_notes: payload.customer_notes ?? null,
       checklist: payload.checklist,
       customer_signature: payload.customer_signature ?? null,
       override_id: overrideId,
@@ -153,4 +156,7 @@ export async function checkOutVehicle(payload: {
   revalidatePath(`/workshop/jobs/${payload.work_order_id}`);
   revalidatePath("/dashboard");
   revalidatePath("/workshop/jobs");
+
+  // best-effort — a report failing to send should never block the release
+  void sendServiceReport(payload.work_order_id);
 }

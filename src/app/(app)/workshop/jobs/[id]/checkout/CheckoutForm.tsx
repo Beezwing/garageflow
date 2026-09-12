@@ -51,6 +51,7 @@ export function CheckoutForm({
     id_verified: false,
     final_mileage: "",
     notes: "",
+    customer_notes: "",
   });
   const [sig, setSig] = React.useState<string | null>(null);
   const [overrideReason, setOverrideReason] = React.useState("");
@@ -77,6 +78,7 @@ export function CheckoutForm({
         id_verified: form.id_verified,
         final_mileage: form.final_mileage ? Number(form.final_mileage) : undefined,
         notes: form.notes || undefined,
+        customer_notes: form.customer_notes || undefined,
         checklist: CHECKS.map((c) => ({ item: c, checked: !!checked[c] })),
         customer_signature: sig ?? undefined,
         override_reason: needsOverride ? overrideReason : undefined,
@@ -140,8 +142,20 @@ export function CheckoutForm({
 
         <SignaturePad label="Customer signature" value={sig} onChange={setSig} />
 
-        <Field label="Notes">
+        <Field label="Notes" hint="Internal — for your own release record, not sent to the customer.">
           <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+        </Field>
+
+        <Field
+          label="Notes for the customer"
+          hint="Goes in their service report — e.g. a part to watch, or something to do next. Optional."
+        >
+          <Textarea
+            value={form.customer_notes}
+            onChange={(e) => setForm({ ...form, customer_notes: e.target.value })}
+            rows={2}
+            placeholder="e.g. Front brake pads at ~20% — plan to replace within 3 months."
+          />
         </Field>
 
         {needsOverride ? (

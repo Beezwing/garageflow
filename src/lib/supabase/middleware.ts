@@ -12,6 +12,7 @@ const PUBLIC_PREFIXES = [
   "/book",
   "/join",
   "/api/cron",
+  "/api/webhooks",
   "/manifest.json",
   "/sw.js",
 ];

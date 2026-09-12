@@ -46,13 +46,21 @@ export default async function PortalJobPage({ params }: { params: Promise<{ id: 
     .maybeSingle();
   if (!wo) notFound();
 
-  const [{ data: tasks }, { data: awrs }, { data: approvals }, { data: invoices }, { data: photos }] = await Promise.all([
-    supabase.from("work_order_tasks").select("title, status").eq("work_order_id", id).order("sequence"),
-    supabase.from("additional_work_requests").select("*").eq("work_order_id", id).order("created_at"),
-    supabase.from("customer_approvals").select("request_id, decision, decided_at"),
-    supabase.from("invoices").select("id, number, status, total, balance").eq("work_order_id", id),
-    supabase.from("vehicle_photos").select("id, url, category, phase").eq("work_order_id", id).order("created_at"),
-  ]);
+  const [{ data: tasks }, { data: awrs }, { data: approvals }, { data: invoices }, { data: photos }, { data: checkout }] =
+    await Promise.all([
+      supabase.from("work_order_tasks").select("title, status").eq("work_order_id", id).order("sequence"),
+      supabase.from("additional_work_requests").select("*").eq("work_order_id", id).order("created_at"),
+      supabase.from("customer_approvals").select("request_id, decision, decided_at"),
+      supabase.from("invoices").select("id, number, status, total, balance").eq("work_order_id", id),
+      supabase.from("vehicle_photos").select("id, url, category, phase").eq("work_order_id", id).order("created_at"),
+      supabase
+        .from("checkouts")
+        .select("customer_notes, created_at")
+        .eq("work_order_id", id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   const v = wo.vehicle as unknown as { make: string; model: string; year: number; license_plate: string } | null;
   const status = wo.status as keyof typeof WORK_ORDER_STATUS_LABELS;
@@ -194,9 +202,41 @@ export default async function PortalJobPage({ params }: { params: Promise<{ id: 
       ) : null}
 
       {wo.status === "checked_out" ? (
-        <p className="text-center text-sm text-text-muted">
-          Collected {wo.checked_out_at ? shortDate(wo.checked_out_at as string) : ""}. Thanks!
-        </p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Service report</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-3 text-sm">
+            {wo.complaint ? (
+              <p>
+                <span className="text-text-subtle">You reported:</span> {wo.complaint as string}
+              </p>
+            ) : null}
+            <div>
+              <p className="mb-1 font-medium text-text">What we did</p>
+              {(tasks ?? []).filter((t) => t.status === "completed").length ? (
+                <ul className="space-y-1 text-text-muted">
+                  {(tasks ?? [])
+                    .filter((t) => t.status === "completed")
+                    .map((t, i) => (
+                      <li key={i}>&#10003; {t.title as string}</li>
+                    ))}
+                </ul>
+              ) : (
+                <p className="text-text-muted">No tasks were logged on this job.</p>
+              )}
+            </div>
+            {checkout?.customer_notes ? (
+              <div className="rounded-[var(--radius)] bg-[var(--tone-amber-bg)] px-3 py-2 text-[var(--tone-amber-fg)]">
+                <p className="mb-0.5 font-medium">Recommendations for you</p>
+                <p>{checkout.customer_notes as string}</p>
+              </div>
+            ) : null}
+            <p className="text-center text-xs text-text-subtle">
+              Collected {wo.checked_out_at ? shortDate(wo.checked_out_at as string) : ""}. Thanks for choosing us!
+            </p>
+          </CardBody>
+        </Card>
       ) : null}
     </div>
   );

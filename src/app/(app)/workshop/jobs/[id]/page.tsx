@@ -410,9 +410,14 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
                 </a>
               ) : null}
               {status === "checked_out" ? (
-                <a href={`/print/checkout/${id}`} target="_blank" rel="noreferrer" className="block text-brand hover:underline">
-                  Vehicle release form (PDF)
-                </a>
+                <>
+                  <a href={`/print/checkout/${id}`} target="_blank" rel="noreferrer" className="block text-brand hover:underline">
+                    Vehicle release form (PDF)
+                  </a>
+                  <a href={`/print/service-report/${id}`} target="_blank" rel="noreferrer" className="block text-brand hover:underline">
+                    Service report (PDF)
+                  </a>
+                </>
               ) : null}
             </CardBody>
           </Card>

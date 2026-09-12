@@ -11,7 +11,7 @@ mkdirSync(OUT, { recursive: true });
 // blue badge used across the app's own UI (login, portal header, etc.)
 const standard = (size) => `
 <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#1554d1"/>
+  <rect width="100" height="100" fill="#f2751a"/>
   <text x="50" y="68" font-family="Arial, sans-serif" font-weight="700"
         font-size="60" fill="#ffffff" text-anchor="middle">G</text>
 </svg>`;
@@ -20,7 +20,7 @@ const standard = (size) => `
 // crops to a circle/squircle doesn't clip the letterform.
 const maskable = (size) => `
 <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#1554d1"/>
+  <rect width="100" height="100" fill="#f2751a"/>
   <text x="50" y="62" font-family="Arial, sans-serif" font-weight="700"
         font-size="46" fill="#ffffff" text-anchor="middle">G</text>
 </svg>`;

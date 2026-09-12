@@ -17,6 +17,7 @@ import {
   Td,
 } from "@/components/ui/primitives";
 import { RemoveItem, AddItem, RecordPayment, StatusControls } from "./InvoiceActions";
+import { PayWithDimePay } from "./PayWithDimePay";
 import { TourButton } from "@/components/tour/AppTour";
 
 const TONE: Record<string, "gray" | "amber" | "green" | "red" | "blue"> = {
@@ -43,10 +44,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     .maybeSingle();
   if (!invoice) notFound();
 
-  const [{ data: items }, { data: payments }] = await Promise.all([
+  const [{ data: items }, { data: payments }, { data: dimepay }] = await Promise.all([
     supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at"),
     supabase.from("payments").select("*").eq("invoice_id", id).order("created_at"),
+    supabase
+      .from("garage_payment_providers")
+      .select("enabled")
+      .eq("garage_id", ctx.garage.id)
+      .eq("provider", "dimepay")
+      .maybeSingle(),
   ]);
+  const dimepayEnabled = Boolean(dimepay?.enabled);
 
   const c = invoice.customer as unknown as { id: string; name: string; phone: string | null } | null;
   const w = invoice.work_order as unknown as { id: string; number: string } | null;
@@ -171,7 +179,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               </TableWrap>
             )}
             {canPay ? (
-              <CardBody className="border-t border-border">
+              <CardBody className="space-y-3 border-t border-border">
+                {dimepayEnabled ? <PayWithDimePay invoiceId={id} /> : null}
                 <RecordPayment
                   invoiceId={id}
                   balance={Number(invoice.balance)}
