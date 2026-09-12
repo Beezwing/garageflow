@@ -38,7 +38,12 @@ export function HomePage() {
     <div className="min-h-dvh bg-bg">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <span className="text-lg font-bold text-brand">GarageFlow</span>
+          <span className="flex items-center gap-2">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
+              G
+            </span>
+            <span className="text-lg font-bold text-brand">GarageFlow</span>
+          </span>
           <ButtonLink href="/login" variant="secondary" size="sm">
             Sign in
           </ButtonLink>
