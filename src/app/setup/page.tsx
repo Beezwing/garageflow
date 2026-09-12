@@ -1,5 +1,6 @@
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { redirect } from "next/navigation";
+import { BrandMark } from "@/components/ui/BrandMark";
 
 export const metadata = { title: "Setup" };
 
@@ -8,9 +9,7 @@ export default function SetupPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand text-lg font-bold text-brand-fg">
-        G
-      </span>
+      <BrandMark size={40} />
       <h1 className="mt-4 text-2xl font-semibold text-text">Finish setting up GarageFlow</h1>
       <p className="mt-2 text-sm text-text-muted">
         GarageFlow needs a Supabase project. This takes about five minutes.

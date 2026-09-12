@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { Card, CardBody, Badge } from "@/components/ui/primitives";
+import { BrandMark } from "@/components/ui/BrandMark";
 
 const CONTACT_EMAIL = "damaliebaker@outlook.com";
 const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
@@ -39,9 +40,7 @@ export function HomePage() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <span className="flex items-center gap-2">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
-              G
-            </span>
+            <BrandMark size={32} />
             <span className="text-lg font-bold text-brand">GarageFlow</span>
           </span>
           <ButtonLink href="/login" variant="secondary" size="sm">
