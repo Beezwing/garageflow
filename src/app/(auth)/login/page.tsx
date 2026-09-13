@@ -73,8 +73,12 @@ function LoginForm() {
           </Link>
         </div>
         <p className="mt-4 border-t border-border pt-4 text-center text-sm text-text-muted">
-          Looking to track a repair instead?{" "}
-          <Link href="/portal/login" className="text-brand hover:underline">
+          Looking to track a repair instead?
+          <br />
+          <Link
+            href="/portal/login"
+            className="whitespace-nowrap text-brand hover:underline"
+          >
             Go to the customer portal
           </Link>
         </p>
