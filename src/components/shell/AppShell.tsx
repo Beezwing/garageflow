@@ -11,6 +11,7 @@ import { NAV } from "./nav";
 import { GarageSwitcher } from "./GarageSwitcher";
 import { GlobalSearch } from "./GlobalSearch";
 import { AppTour } from "@/components/tour/AppTour";
+import { BrandMark } from "@/components/ui/BrandMark";
 
 interface ShellGarage {
   id: string;
@@ -106,9 +107,7 @@ export function AppShell({
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-border bg-surface lg:flex">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
-            G
-          </span>
+          <BrandMark size={32} />
           <span className="font-semibold text-text">GarageFlow</span>
         </div>
         <div className="space-y-2 border-b border-border px-3 py-3">
@@ -125,7 +124,10 @@ export function AppShell({
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <aside className="pt-safe pb-safe relative flex h-full w-[82vw] max-w-xs flex-col border-r border-border bg-surface">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <span className="font-semibold text-text">GarageFlow</span>
+              <span className="flex items-center gap-2">
+                <BrandMark size={28} />
+                <span className="font-semibold text-text">GarageFlow</span>
+              </span>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="grid h-9 w-9 place-items-center rounded-[var(--radius)] text-text-muted hover:bg-surface-2"

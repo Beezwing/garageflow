@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPortalContext } from "@/lib/portal";
+import { BrandMark } from "@/components/ui/BrandMark";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
@@ -10,9 +11,13 @@ export default async function PortalLayout({ children }: { children: React.React
       <header className="pt-safe sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2.5">
           <Link href={ctx ? "/portal" : "/portal/login"} className="flex items-center gap-2">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
-              {(garageName ?? "G").charAt(0)}
-            </span>
+            {garageName ? (
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
+                {garageName.charAt(0)}
+              </span>
+            ) : (
+              <BrandMark size={32} />
+            )}
             <span className="text-sm font-semibold text-text">{garageName ?? "GarageFlow"}</span>
           </Link>
           {ctx && ctx.customers.length > 0 ? (
