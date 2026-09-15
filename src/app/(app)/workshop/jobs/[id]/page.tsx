@@ -284,18 +284,30 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
             woId={id}
             garageId={gid}
             currency={currency}
-            requests={(awrs ?? []).map((r) => ({
-              id: r.id as string,
-              problem: r.problem as string,
-              recommendation: r.recommendation as string | null,
-              price: Number(r.price),
-              status: r.status as string,
-              requested_by: r.requested_by as string | null,
-              requester: r.requested_by ? nameById.get(r.requested_by as string) ?? null : null,
-              approval: (approvals ?? []).find((a) => a.request_id === r.id) as
-                | { decision: string; amount: number; method: string }
-                | undefined,
-            }))}
+            requests={(awrs ?? []).map((r) => {
+              const approval = (approvals ?? []).find((a) => a.request_id === r.id) as
+                | { decision: string; amount: number; method: string; decided_at: string; recorded_by: string | null }
+                | undefined;
+              return {
+                id: r.id as string,
+                problem: r.problem as string,
+                recommendation: r.recommendation as string | null,
+                price: Number(r.price),
+                status: r.status as string,
+                requested_by: r.requested_by as string | null,
+                requester: r.requested_by ? nameById.get(r.requested_by as string) ?? null : null,
+                requested_at: r.created_at as string,
+                approval: approval
+                  ? {
+                      decision: approval.decision,
+                      amount: approval.amount,
+                      method: approval.method,
+                      decided_at: approval.decided_at,
+                      recorded_by: approval.recorded_by ? nameById.get(approval.recorded_by) ?? null : null,
+                    }
+                  : undefined,
+              };
+            })}
             currentUserId={ctx.userId}
             canRequest={can(ctx.role, "additionalWork.request")}
             canApprove={can(ctx.role, "additionalWork.recordApproval")}

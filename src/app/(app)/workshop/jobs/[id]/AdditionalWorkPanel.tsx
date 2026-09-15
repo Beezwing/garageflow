@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { requestAdditionalWork, recordApproval, overrideAdditionalWork } from "@/lib/actions/workorders";
-import { money } from "@/lib/format";
+import { money, dateTime } from "@/lib/format";
 import { Card, CardBody, CardHeader, CardTitle, Badge } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -17,7 +17,8 @@ interface Req {
   status: string;
   requested_by: string | null;
   requester: string | null;
-  approval?: { decision: string; amount: number; method: string };
+  requested_at: string;
+  approval?: { decision: string; amount: number; method: string; decided_at: string; recorded_by: string | null };
 }
 
 const TONE: Record<string, "amber" | "green" | "red" | "gray"> = {
@@ -102,9 +103,13 @@ export function AdditionalWorkPanel({
                   Estimate: <span className="font-medium text-text">{money(r.price, currency)}</span>
                   {r.requester ? ` · raised by ${r.requester}` : ""}
                 </p>
+                <p className="mt-1 text-xs text-text-subtle">Requested {dateTime(r.requested_at)}</p>
                 {r.approval ? (
                   <p className="mt-1 text-xs text-text-subtle">
                     Customer {r.approval.decision} {money(r.approval.amount, currency)} via {r.approval.method}
+                    {r.approval.recorded_by ? ` (recorded by ${r.approval.recorded_by})` : ""}
+                    {" · "}
+                    {dateTime(r.approval.decided_at)}
                   </p>
                 ) : null}
 
